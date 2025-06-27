@@ -1,6 +1,6 @@
 import gradio as gr
 from TextToPDF import TextToPDF
-from Qwen3_Model import ask_medical_llm
+from Model import ask_medical_llm
 
 # 语音转文字
 from transformers import pipeline
