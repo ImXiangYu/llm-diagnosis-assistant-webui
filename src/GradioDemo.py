@@ -1,9 +1,17 @@
 import gradio as gr
 from TextToPDF import TextToPDF
-from Qwen3_Model import ask_medical_llm
+from Model import ask_medical_llm
+
+# 语音转文字
+from transformers import pipeline
+import numpy as np
 
 medical_data = {}
 
+# 调用Openai的whisper模型，支持多语言
+transcriber = pipeline("automatic-speech-recognition", model="openai/whisper-base")
+
+# 调用本地模型
 def chat(user_input, history):
     print("--------------已开启新一轮调用--------------")
     result = ask_medical_llm(user_input)
@@ -19,6 +27,7 @@ def chat(user_input, history):
     print("--------------history--------------")
     return "", history, result["chief_complaint"], result["examinations"], result["diagnosis"], result["disposal"]
 
+# 生成PDF
 def generate_pdf(this_name, this_gender, this_age, this_phone, chief, exam, diag, disp):
     print("正在准备保存为PDF...")
     pdf_path = TextToPDF(this_name, this_gender, this_age, this_phone,
@@ -28,7 +37,24 @@ def generate_pdf(this_name, this_gender, this_age, this_phone, chief, exam, diag
                          disposal=disp)
     return pdf_path
 
-with gr.Blocks(title="智能医疗诊断系统") as demo:
+# 语音转文字
+def transcribe(audio):
+    sr, y = audio
+    if y.ndim > 1:
+        y = y.mean(axis=1)
+    y = y.astype(np.float32)
+    y /= np.max(np.abs(y))
+    return transcriber({"sampling_rate": sr, "raw": y})["text"]
+
+# 预设的css样式，可以应用到gradio程序中
+custom_css ="""
+#clear-btn {
+    background-color: red;
+    color: white;
+}
+"""
+
+with gr.Blocks(title="智能医疗诊断系统", css=custom_css) as demo:
     gr.Markdown("# 智能医疗诊断系统")
 
     # 顶部：病人信息填写
@@ -45,8 +71,14 @@ with gr.Blocks(title="智能医疗诊断系统") as demo:
             chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=300)
             msg = gr.Textbox(label="输入您的病情描述")
             with gr.Row():
+                clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
+                                           elem_id="clear-btn")
                 send_btn = gr.Button("发送")
-                clear_btn = gr.ClearButton([msg, chatbot], value="清空对话")
+            with gr.Row():
+                transcribe_btn = gr.Button("识别语音")
+            with gr.Row():
+                audio_input = gr.Audio(sources="microphone", label="语音输入")
+            transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
 
         # 右侧：可编辑框和PDF生成
         with gr.Column(scale=1):
@@ -64,10 +96,13 @@ with gr.Blocks(title="智能医疗诊断系统") as demo:
         outputs=[msg, chatbot, chief_complaint_box, examinations_box, diagnosis_box, disposal_box]
     )
 
+    # PDF生成
     generate_btn.click(
         generate_pdf,
         inputs=[name, gender, age, phone, chief_complaint_box, examinations_box, diagnosis_box, disposal_box],
         outputs=file_output
     )
 
-demo.launch(share=True)
+# 通过share控制是否开启分享链接，实测开启的话Gradio启动会变慢
+# 开发时暂时不开启
+demo.launch(share=False)
