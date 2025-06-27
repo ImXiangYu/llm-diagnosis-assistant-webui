@@ -9,6 +9,8 @@ import numpy as np
 medical_data = {}
 
 # 调用Openai的whisper模型，支持多语言
+# 这里暂时使用pipeline，后续部署到本地
+# 并且这个模型中文效果很差，后续应该要更换
 transcriber = pipeline("automatic-speech-recognition", model="openai/whisper-base")
 
 # 调用本地模型
