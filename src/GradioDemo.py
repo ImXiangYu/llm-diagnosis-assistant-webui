@@ -1,14 +1,7 @@
 import gradio as gr
 import numpy as np
 
-from TextToPDF import TextToPDF
 from Model import ask_medical_llm
-
-# 语音转文字
-from modelscope.pipelines import pipeline
-from modelscope.utils.constant import Tasks
-import tempfile
-import soundfile as sf
 
 # 禁用ModelScope的非Error日志
 from modelscope.utils.logger import get_logger
@@ -23,40 +16,19 @@ def clean_text(raw_text):
 # 用于模型记录输出
 medical_data = {}
 
-# 换成了通义的SenseVoiceSmall，看看效果如何
+# 语音转文字
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+import tempfile
+import soundfile as sf
+# 换成了通义的SenseVoiceSmall，效果比之前的Whisper要好很多
 asr_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='iic/SenseVoiceSmall',
     model_revision="master",
     device="cuda:0",)
 
-# 调用本地模型
-def chat(user_input, history):
-    print("--------------已开启新一轮调用--------------")
-    result = ask_medical_llm(user_input)
-    medical_data.update(result)
-
-    history.append({"role": "user", "content": user_input})
-    history.append({"role": "assistant", "content":
-        "主诉：" + result["chief_complaint"] + "\n" +
-        "辅助检查：" + result["examinations"] + "\n" +
-        "诊断：" + result["diagnosis"] + "\n" +
-        "处置意见：" + result["disposal"]})
-
-    print("--------------history--------------")
-    return "", history, result["chief_complaint"], result["examinations"], result["diagnosis"], result["disposal"]
-
-# 生成PDF
-def generate_pdf(this_name, this_gender, this_age, this_phone, chief, exam, diag, disp):
-    print("正在准备保存为PDF...")
-    pdf_path = TextToPDF(this_name, this_gender, this_age, this_phone,
-                         chief_complaint=chief,
-                         examinations=exam,
-                         diagnosis=diag,
-                         disposal=disp)
-    return pdf_path
-
-# 语音转文字
+# 语音转文字 Function
 def transcribe(audio):
     if not audio or not isinstance(audio, (tuple, list)) or len(audio) != 2:
         return "无效的音频输入，请重新录音"
@@ -78,6 +50,53 @@ def transcribe(audio):
     except Exception as e:
         print("识别失败：", e)
         return "语音识别失败，请重试"
+
+
+# 调用本地模型
+def chat(user_input, history):
+    print("--------------已开启新一轮调用--------------")
+    result = ask_medical_llm(user_input)
+    medical_data.update(result)
+
+    history.append({"role": "user", "content": user_input})
+    history.append({"role": "assistant", "content":
+        "主诉：" + result["chief_complaint"] + "\n" +
+        "辅助检查：" + result["examinations"] + "\n" +
+        "诊断：" + result["diagnosis"] + "\n" +
+        "处置意见：" + result["disposal"]})
+
+    print("--------------history--------------")
+    return "", history, result["chief_complaint"], result["examinations"], result["diagnosis"], result["disposal"]
+
+# 生成PDF
+from TextToPDF import TextToPDF
+def generate_pdf(this_name, this_gender, this_age, this_phone, chief, exam, diag, disp):
+    print("正在准备保存为PDF...")
+    pdf_path = TextToPDF(this_name, this_gender, this_age, this_phone,
+                         chief_complaint=chief,
+                         examinations=exam,
+                         diagnosis=diag,
+                         disposal=disp)
+    return pdf_path
+
+
+# 支持用户上传图片（例如影像报告）
+import shutil
+import os
+def save_uploaded_image(image_path):
+    if image_path is None or not os.path.exists(image_path):
+        return None
+
+    save_dir = "UploadedImages"
+    os.makedirs(save_dir, exist_ok=True)
+
+    filename = os.path.basename(image_path)
+    save_path = os.path.join(save_dir, filename)
+
+    shutil.copy(image_path, save_path)
+    print(f"图片已保存到：{save_path}")
+
+    return save_path  # 用于在界面上显示
 
 
 # 预设的css样式，可以应用到gradio程序中
@@ -109,14 +128,6 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* 卡片颜色 */
-#card {
-    background-color: #67E667;       /* 卡片背景色 */
-    border-radius: 12px;             /* 圆角 */
-    padding: 16px;                   /* 内边距 */
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);  /* 阴影 */
-}
-
 /* 普通文本框边框样式 */
 textarea, input, .gradio-textbox {
     border: 1px solid #ccc !important;
@@ -131,8 +142,17 @@ textarea, input, .gradio-textbox {
     border: 1px solid #ccc !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
+
+/* 取消点击输入框后的蓝色背景 */
+textarea:focus, .gradio-textbox:focus {
+    background-color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid #999 !important;
+}
 """
 
+# 系统主体
 with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/calm_seafoam') as demo:
     gr.Markdown("# 智能医疗诊断系统")
 
@@ -143,30 +163,43 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
         age = gr.Textbox(label="年龄")
         phone = gr.Textbox(label="电话")
 
+    with gr.Tabs():
+        with gr.Tab("文本诊疗"):
     # 中间：左右布局
-    with gr.Row():
-        # 左侧：聊天界面
-        with gr.Column(scale=1):
-            chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=300)
-            msg = gr.Textbox(label="输入您的病情描述")
             with gr.Row():
-                clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
-                                           elem_id="clear-btn")
-                send_btn = gr.Button("发送")
-            with gr.Row():
-                transcribe_btn = gr.Button("识别语音")
-            with gr.Row():
-                audio_input = gr.Audio(sources="microphone", label="语音输入")
-            transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
+                # 左侧：聊天界面
+                with gr.Column(scale=1):
+                    chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=260)
+                    msg = gr.Textbox(label="输入您的病情描述")
+                    with gr.Row():
+                        clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
+                                                   elem_id="clear-btn")
+                        send_btn = gr.Button("发送")
+                    with gr.Row():
+                        transcribe_btn = gr.Button("识别语音")
+                    with gr.Row():
+                        audio_input = gr.Audio(sources="microphone", label="语音输入")
+                    transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
 
-        # 右侧：可编辑框和PDF生成
-        with gr.Column(scale=1):
-            chief_complaint_box = gr.Textbox(label="主诉", lines=2)
-            examinations_box = gr.Textbox(label="辅助检查", lines=2)
-            diagnosis_box = gr.Textbox(label="诊断", lines=2)
-            disposal_box = gr.Textbox(label="处置意见", lines=2)
-            generate_btn = gr.Button("生成病历PDF")
-            file_output = gr.File(label="下载PDF")
+                # 右侧：可编辑框和PDF生成
+                with gr.Column(scale=1):
+                    chief_complaint_box = gr.Textbox(label="主诉", lines=2)
+                    examinations_box = gr.Textbox(label="辅助检查", lines=2)
+                    diagnosis_box = gr.Textbox(label="诊断", lines=2)
+                    disposal_box = gr.Textbox(label="处置意见", lines=2)
+                    generate_btn = gr.Button("生成病历PDF")
+                    file_output = gr.File(label="下载PDF", visible=False)
+
+        with gr.Tab("图像处理"):
+            # 上传图片, 自动保存, 显示
+            image_input = gr.Image(type="filepath", label="上传图片")
+            uploaded_image = gr.Image(label="显示上传图片")
+
+            image_input.change(
+                save_uploaded_image,
+                inputs=image_input,
+                outputs=uploaded_image
+            )
 
     # 绑定事件
     send_btn.click(
@@ -179,6 +212,9 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
     generate_btn.click(
         generate_pdf,
         inputs=[name, gender, age, phone, chief_complaint_box, examinations_box, diagnosis_box, disposal_box],
+        outputs=file_output
+    ).then(
+        lambda x: gr.update(visible=True),
         outputs=file_output
     )
 
