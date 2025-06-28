@@ -1,17 +1,34 @@
 import gradio as gr
+import numpy as np
+
 from TextToPDF import TextToPDF
 from Model import ask_medical_llm
 
 # 语音转文字
-from transformers import pipeline
-import numpy as np
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+import tempfile
+import soundfile as sf
 
+# 禁用ModelScope的非Error日志
+from modelscope.utils.logger import get_logger
+logger = get_logger()
+logger.setLevel(40)
+
+# 用于处理正则
+import re
+def clean_text(raw_text):
+    return re.sub(r"<\|.*?\|>", "", raw_text)
+
+# 用于模型记录输出
 medical_data = {}
 
-# 调用Openai的whisper模型，支持多语言
-# 这里暂时使用pipeline，后续部署到本地
-# 并且这个模型中文效果很差，后续应该要更换
-transcriber = pipeline("automatic-speech-recognition", model="openai/whisper-base")
+# 换成了通义的SenseVoiceSmall，看看效果如何
+asr_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='iic/SenseVoiceSmall',
+    model_revision="master",
+    device="cuda:0",)
 
 # 调用本地模型
 def chat(user_input, history):
@@ -41,12 +58,27 @@ def generate_pdf(this_name, this_gender, this_age, this_phone, chief, exam, diag
 
 # 语音转文字
 def transcribe(audio):
+    if not audio or not isinstance(audio, (tuple, list)) or len(audio) != 2:
+        return "无效的音频输入，请重新录音"
+
     sr, y = audio
+    if y is None or len(y) == 0:
+        return "音频数据为空，请重新录音"
+
     if y.ndim > 1:
         y = y.mean(axis=1)
     y = y.astype(np.float32)
-    y /= np.max(np.abs(y))
-    return transcriber({"sampling_rate": sr, "raw": y})["text"]
+
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        sf.write(f.name, y, sr)
+        result = asr_pipeline(f.name)
+
+    try:
+        return clean_text(result[0]["text"])
+    except Exception as e:
+        print("识别失败：", e)
+        return "语音识别失败，请重试"
+
 
 # 预设的css样式，可以应用到gradio程序中
 custom_css ="""
@@ -107,4 +139,6 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css) as demo:
 
 # 通过share控制是否开启分享链接，实测开启的话Gradio启动会变慢
 # 开发时暂时不开启
+# demo.launch(share=True)
+
 demo.launch(share=False)
