@@ -144,7 +144,7 @@ textarea, input, .gradio-textbox {
 }
 
 /* 取消点击输入框后的蓝色背景 */
-input:focus, textarea:focus, .gradio-textbox:focus {
+textarea:focus, .gradio-textbox:focus {
     background-color: white !important;
     outline: none !important;
     box-shadow: none !important;
