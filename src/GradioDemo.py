@@ -82,13 +82,58 @@ def transcribe(audio):
 
 # 预设的css样式，可以应用到gradio程序中
 custom_css ="""
+/* 背景页面淡蓝色 */
+.gradio-container {
+    background-color: #f2f6fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 页脚 */
+#footer {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin-top: 20px;
+}
+
+/* 清空按钮 */
 #clear-btn {
     background-color: red;
     color: white;
 }
+
+/* Markdown 标题样式 */
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* 卡片颜色 */
+#card {
+    background-color: #67E667;       /* 卡片背景色 */
+    border-radius: 12px;             /* 圆角 */
+    padding: 16px;                   /* 内边距 */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);  /* 阴影 */
+}
+
+/* 普通文本框边框样式 */
+textarea, input, .gradio-textbox {
+    border: 1px solid #ccc !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ChatBot文本框边框样式 */
+.gradio-chatbot {
+    border-radius: 8px !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
 """
 
-with gr.Blocks(title="智能医疗诊断系统", css=custom_css) as demo:
+with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/calm_seafoam') as demo:
     gr.Markdown("# 智能医疗诊断系统")
 
     # 顶部：病人信息填写
@@ -136,6 +181,8 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css) as demo:
         inputs=[name, gender, age, phone, chief_complaint_box, examinations_box, diagnosis_box, disposal_box],
         outputs=file_output
     )
+
+    gr.Markdown("© 2025 智能医疗诊断系统 | 版权所有", elem_id="footer")
 
 # 通过share控制是否开启分享链接，实测开启的话Gradio启动会变慢
 # 开发时暂时不开启
