@@ -128,14 +128,6 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* 卡片颜色 */
-#card {
-    background-color: #67E667;       /* 卡片背景色 */
-    border-radius: 12px;             /* 圆角 */
-    padding: 16px;                   /* 内边距 */
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);  /* 阴影 */
-}
-
 /* 普通文本框边框样式 */
 textarea, input, .gradio-textbox {
     border: 1px solid #ccc !important;
@@ -150,6 +142,14 @@ textarea, input, .gradio-textbox {
     border: 1px solid #ccc !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
+
+/* 取消点击输入框后的蓝色背景 */
+input:focus, textarea:focus, .gradio-textbox:focus {
+    background-color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid #999 !important;
+}
 """
 
 # 系统主体
@@ -163,31 +163,34 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
         age = gr.Textbox(label="年龄")
         phone = gr.Textbox(label="电话")
 
+    with gr.Tabs():
+        with gr.Tab("文本诊疗"):
     # 中间：左右布局
-    with gr.Row():
-        # 左侧：聊天界面
-        with gr.Column(scale=1):
-            chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=300)
-            msg = gr.Textbox(label="输入您的病情描述")
             with gr.Row():
-                clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
-                                           elem_id="clear-btn")
-                send_btn = gr.Button("发送")
-            with gr.Row():
-                transcribe_btn = gr.Button("识别语音")
-            with gr.Row():
-                audio_input = gr.Audio(sources="microphone", label="语音输入")
-            transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
+                # 左侧：聊天界面
+                with gr.Column(scale=1):
+                    chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=260)
+                    msg = gr.Textbox(label="输入您的病情描述")
+                    with gr.Row():
+                        clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
+                                                   elem_id="clear-btn")
+                        send_btn = gr.Button("发送")
+                    with gr.Row():
+                        transcribe_btn = gr.Button("识别语音")
+                    with gr.Row():
+                        audio_input = gr.Audio(sources="microphone", label="语音输入")
+                    transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
 
-        # 右侧：可编辑框和PDF生成
-        with gr.Column(scale=1):
-            chief_complaint_box = gr.Textbox(label="主诉", lines=2)
-            examinations_box = gr.Textbox(label="辅助检查", lines=2)
-            diagnosis_box = gr.Textbox(label="诊断", lines=2)
-            disposal_box = gr.Textbox(label="处置意见", lines=2)
-            generate_btn = gr.Button("生成病历PDF")
-            file_output = gr.File(label="下载PDF")
+                # 右侧：可编辑框和PDF生成
+                with gr.Column(scale=1):
+                    chief_complaint_box = gr.Textbox(label="主诉", lines=2)
+                    examinations_box = gr.Textbox(label="辅助检查", lines=2)
+                    diagnosis_box = gr.Textbox(label="诊断", lines=2)
+                    disposal_box = gr.Textbox(label="处置意见", lines=2)
+                    generate_btn = gr.Button("生成病历PDF")
+                    file_output = gr.File(label="下载PDF", visible=False)
 
+        with gr.Tab("图像处理"):
             # 上传图片, 自动保存, 显示
             image_input = gr.Image(type="filepath", label="上传图片")
             uploaded_image = gr.Image(label="显示上传图片")
@@ -209,6 +212,9 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
     generate_btn.click(
         generate_pdf,
         inputs=[name, gender, age, phone, chief_complaint_box, examinations_box, diagnosis_box, disposal_box],
+        outputs=file_output
+    ).then(
+        lambda x: gr.update(visible=True),
         outputs=file_output
     )
 
