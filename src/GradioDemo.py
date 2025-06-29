@@ -29,13 +29,18 @@ def chat(user_input, history):
 
 # 生成PDF
 from TextToPDF import TextToPDF
-def generate_pdf(this_name, this_gender, this_age, this_phone, chief, exam, diag, disp):
+def generate_pdf(this_name, this_gender, this_age, this_phone,
+                 chief, exam, diag, disp, this_current_user):
     print("正在准备保存为PDF...")
-    pdf_path = TextToPDF(this_name, this_gender, this_age, this_phone,
+    saved_pdf = TextToPDF(this_name, this_gender, this_age, this_phone,
                          chief_complaint=chief,
                          examinations=exam,
                          diagnosis=diag,
                          disposal=disp)
+    pdf_filename = saved_pdf[1]
+    pdf_path = saved_pdf[0]
+    user_id = this_current_user[0]
+    database.add_user_file(user_id, pdf_filename)
     return pdf_path
 
 
@@ -76,6 +81,23 @@ def handle_login(username, password):
 def handle_register(username, password):
     ok, msg = database.register_user(username, password)
     return msg, gr.update(visible=True) if ok else gr.update()
+
+# 查询文件逻辑
+def handle_query_files(user):
+    if not user:
+        return "❌ 请先登录", None
+
+    files = database.get_user_files(user[0])
+    file_data = [
+        [f["name"], f"📥 下载"]
+        for f in files
+    ]
+
+    if not file_data:
+        # 如果没有文件，返回提示行
+        return [["⚠️ 无历史病历", ""]]
+
+    return file_data
 
 
 # 预设的css样式，可以应用到gradio程序中
@@ -211,9 +233,17 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
 
             with gr.Tab("历史病历查询"):
                 with gr.Column():
-                    gr.Markdown("## 历史病历")
+                    gr.Markdown("### 📂 历史病历")
                     with gr.Row():
-                        refresh_btn = gr.Button("刷新病历列表")
+                        query_btn = gr.Button("🔍 查询历史病历")
+
+                    # 文件列表显示 - 使用DataFrame
+                    file_table = gr.DataFrame(
+                        headers=["文件名", "操作"],
+                        datatype=["str", "str"],
+                        interactive=False,
+                        wrap=True
+                    )
 
     # 绑定事件
     send_btn.click(
@@ -246,11 +276,18 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
     # PDF生成
     generate_btn.click(
         generate_pdf,
-        inputs=[name, gender, age, phone, chief_complaint_box, examinations_box, diagnosis_box, disposal_box],
+        inputs=[name, gender, age, phone, chief_complaint_box,
+                examinations_box, diagnosis_box, disposal_box, current_user],
         outputs=file_output
     ).then(
         lambda x: gr.update(visible=True),
         outputs=file_output
+    )
+
+    query_btn.click(
+        fn=handle_query_files,
+        inputs=current_user,
+        outputs=file_table
     )
 
     gr.Markdown("© 2025 智能医疗诊断系统 | 版权所有", elem_id="footer")
