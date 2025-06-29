@@ -4,6 +4,10 @@ from Model import ask_medical_llm
 # 声音转文字
 from src.VoiceToText import transcribe
 
+# 初始化数据库
+import database
+database.init_db()
+
 # 用于模型记录输出
 medical_data = {}
 
@@ -53,6 +57,26 @@ def save_uploaded_image(image_path):
 
     return save_path  # 用于在界面上显示
 
+# 登录逻辑
+def handle_login(username, password):
+    user_id = database.authenticate_user(username, password)
+    if user_id:
+        return (
+            "",
+            gr.update(visible=False),
+            gr.update(visible=False),
+            gr.update(visible=True),
+            (user_id, username)
+        )
+    else:
+        return "❌ 用户名或密码错误", gr.update(), gr.update(), gr.update(visible=False), None, ""
+
+
+# 注册逻辑
+def handle_register(username, password):
+    ok, msg = database.register_user(username, password)
+    return msg, gr.update(visible=True) if ok else gr.update()
+
 
 # 预设的css样式，可以应用到gradio程序中
 custom_css ="""
@@ -83,6 +107,12 @@ h1 {
     margin-bottom: 20px;
 }
 
+/* Markdown 标题样式 */
+h2 {
+    color: #1e40af;
+    margin-bottom: 20px;
+}
+
 /* 普通文本框边框样式 */
 textarea, input, .gradio-textbox {
     border: 1px solid #ccc !important;
@@ -109,58 +139,108 @@ textarea:focus, .gradio-textbox:focus {
 
 # 系统主体
 with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/calm_seafoam') as demo:
-    gr.Markdown("# 智能医疗诊断系统")
+    current_user = gr.State(value=None)  # (user_id, username)
 
-    # 顶部：病人信息填写
+    # 登录/注册界面
     with gr.Row():
-        name = gr.Textbox(label="姓名")
-        gender = gr.Radio(["男", "女"], label="性别")
-        age = gr.Textbox(label="年龄")
-        phone = gr.Textbox(label="电话")
+        with gr.Column(visible=True) as login_panel:
+            gr.Markdown("## 🔐 登录")
+            login_username = gr.Textbox(label="用户名")
+            login_password = gr.Textbox(label="密码", type="password")
+            login_button = gr.Button("登录")
+            login_info = gr.Markdown(value="")
 
-    with gr.Tabs():
-        with gr.Tab("文本诊疗"):
-    # 中间：左右布局
-            with gr.Row():
-                # 左侧：聊天界面
-                with gr.Column(scale=1):
-                    chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=260)
-                    msg = gr.Textbox(label="输入您的病情描述")
+        with gr.Column(visible=True) as register_panel:
+            gr.Markdown("## 📝 注册")
+            register_username = gr.Textbox(label="新用户名")
+            register_password = gr.Textbox(label="新密码", type="password")
+            register_button = gr.Button("注册")
+            register_info = gr.Markdown("")
+
+    # 主界面
+    with gr.Column(visible=False) as main_panel:
+        with gr.Row():
+            gr.Markdown("")
+            gr.Markdown("# 智能医疗诊断系统")
+            user_label = gr.Markdown()
+
+        # 顶部：病人信息填写
+        with gr.Row():
+            name = gr.Textbox(label="姓名")
+            gender = gr.Radio(["男", "女"], label="性别")
+            age = gr.Textbox(label="年龄")
+            phone = gr.Textbox(label="电话")
+
+        with gr.Tabs():
+            with gr.Tab("文本诊疗"):
+        # 中间：左右布局
+                with gr.Row():
+                    # 左侧：聊天界面
+                    with gr.Column(scale=1):
+                        chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=260)
+                        msg = gr.Textbox(label="输入您的病情描述")
+                        with gr.Row():
+                            clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
+                                                       elem_id="clear-btn")
+                            send_btn = gr.Button("发送")
+                        with gr.Row():
+                            transcribe_btn = gr.Button("识别语音")
+                        with gr.Row():
+                            audio_input = gr.Audio(sources="microphone", label="语音输入")
+                        transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
+
+                    # 右侧：可编辑框和PDF生成
+                    with gr.Column(scale=1):
+                        chief_complaint_box = gr.Textbox(label="主诉", lines=2)
+                        examinations_box = gr.Textbox(label="辅助检查", lines=2)
+                        diagnosis_box = gr.Textbox(label="诊断", lines=2)
+                        disposal_box = gr.Textbox(label="处置意见", lines=2)
+                        generate_btn = gr.Button("生成病历PDF")
+                        file_output = gr.File(label="下载PDF", visible=False)
+
+            with gr.Tab("图像处理"):
+                # 上传图片, 自动保存, 显示
+                image_input = gr.Image(type="filepath", label="上传图片")
+                uploaded_image = gr.Image(label="显示上传图片")
+
+                image_input.change(
+                    save_uploaded_image,
+                    inputs=image_input,
+                    outputs=uploaded_image
+                )
+
+            with gr.Tab("历史病历查询"):
+                with gr.Column():
+                    gr.Markdown("## 历史病历")
                     with gr.Row():
-                        clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
-                                                   elem_id="clear-btn")
-                        send_btn = gr.Button("发送")
-                    with gr.Row():
-                        transcribe_btn = gr.Button("识别语音")
-                    with gr.Row():
-                        audio_input = gr.Audio(sources="microphone", label="语音输入")
-                    transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
-
-                # 右侧：可编辑框和PDF生成
-                with gr.Column(scale=1):
-                    chief_complaint_box = gr.Textbox(label="主诉", lines=2)
-                    examinations_box = gr.Textbox(label="辅助检查", lines=2)
-                    diagnosis_box = gr.Textbox(label="诊断", lines=2)
-                    disposal_box = gr.Textbox(label="处置意见", lines=2)
-                    generate_btn = gr.Button("生成病历PDF")
-                    file_output = gr.File(label="下载PDF", visible=False)
-
-        with gr.Tab("图像处理"):
-            # 上传图片, 自动保存, 显示
-            image_input = gr.Image(type="filepath", label="上传图片")
-            uploaded_image = gr.Image(label="显示上传图片")
-
-            image_input.change(
-                save_uploaded_image,
-                inputs=image_input,
-                outputs=uploaded_image
-            )
+                        refresh_btn = gr.Button("刷新病历列表")
 
     # 绑定事件
     send_btn.click(
         chat,
         inputs=[msg, chatbot],
         outputs=[msg, chatbot, chief_complaint_box, examinations_box, diagnosis_box, disposal_box]
+    )
+
+    # 登录
+    login_button.click(
+        fn=handle_login,
+        inputs=[login_username, login_password],
+        outputs=[login_info, login_panel, register_panel, main_panel, current_user]
+    )
+
+    # 注册
+    register_button.click(
+        fn=handle_register,
+        inputs=[register_username, register_password],
+        outputs=[register_info, login_panel]
+    )
+
+    # 用户名显示
+    current_user.change(
+        lambda u: f"## 👤 当前用户：**{u[1]}**" if u else "",
+        inputs=current_user,
+        outputs=user_label
     )
 
     # PDF生成
