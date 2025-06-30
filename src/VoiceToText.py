@@ -1,3 +1,9 @@
+# 禁用ModelScope的info和warning
+import logging
+import sys
+
+logging.disable(sys.maxsize)
+
 # 用于处理正则
 import re
 import numpy as np

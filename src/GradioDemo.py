@@ -79,8 +79,8 @@ def handle_login(username, password):
 
 # 注册逻辑
 def handle_register(username, password):
-    ok, msg = database.register_user(username, password)
-    return msg, gr.update(visible=True) if ok else gr.update()
+    ok, this_msg = database.register_user(username, password)
+    return this_msg, gr.update(visible=True) if ok else gr.update()
 
 # 查询文件逻辑
 def handle_query_files(user):
@@ -143,19 +143,19 @@ textarea, input, .gradio-textbox {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* 取消点击输入框后的蓝色背景 */
+textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
+    background-color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid #999 !important;
+}
+
 /* ChatBot文本框边框样式 */
 .gradio-chatbot {
     border-radius: 8px !important;
     border: 1px solid #ccc !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* 取消点击输入框后的蓝色背景 */
-textarea:focus, .gradio-textbox:focus {
-    background-color: white !important;
-    outline: none !important;
-    box-shadow: none !important;
-    border: 1px solid #999 !important;
 }
 """
 
@@ -177,7 +177,7 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
             register_username = gr.Textbox(label="新用户名")
             register_password = gr.Textbox(label="新密码", type="password")
             register_button = gr.Button("注册")
-            register_info = gr.Markdown("")
+            register_info = gr.Markdown(value="")
 
     # 主界面
     with gr.Column(visible=False) as main_panel:
@@ -208,7 +208,7 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
                         with gr.Row():
                             transcribe_btn = gr.Button("识别语音")
                         with gr.Row():
-                            audio_input = gr.Audio(sources="microphone", label="语音输入")
+                            audio_input = gr.Audio(sources=["microphone"], label="语音输入")
                         transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
 
                     # 右侧：可编辑框和PDF生成
