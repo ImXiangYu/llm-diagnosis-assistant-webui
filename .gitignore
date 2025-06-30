@@ -2,3 +2,5 @@
 __pycache__/
 SavedMedicalRecords/
 UploadedImages/
+UserFiles/
+app.db

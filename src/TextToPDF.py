@@ -41,4 +41,4 @@ def TextToPDF(name, gender, age, phone,
         pythoncom.CoUninitialize()
 
     word_to_pdf(word_path, pdf_path)
-    return pdf_path
+    return [pdf_path, pdf_filename]
