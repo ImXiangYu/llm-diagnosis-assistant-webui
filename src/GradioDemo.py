@@ -244,6 +244,8 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
                         interactive=False,
                         wrap=True
                     )
+                # 隐藏文件下载组件
+                file_download = gr.File(label="文件下载", visible=False)
 
     # 绑定事件
     send_btn.click(
@@ -288,6 +290,49 @@ with gr.Blocks(title="智能医疗诊断系统", css=custom_css, theme='shivi/ca
         fn=handle_query_files,
         inputs=current_user,
         outputs=file_table
+    )
+
+    # 文件下载逻辑
+    def handle_file_selection(user, data, evt: gr.SelectData):
+        """处理文件选择并显示下载组件"""
+        try:
+            # 检查用户是否登录
+            if not user:
+                return gr.File(visible=False)
+
+            # 获取选中的行索引
+            selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
+            row_index = selected_idx[0]
+
+            # 获取选中的行数据
+            # selected_data = data.iat[selected_idx[0], selected_idx[1]]
+            selected_row = data.iloc[row_index]
+            # print(selected_row)
+
+            # 行数据分两个，[file_name, button]
+            # 从行数据中提取file_name
+            # 获取文件路径
+            file_path = database.get_file_by_filename(selected_row[0])
+            if file_path and os.path.exists(file_path):
+                # 返回可见的文件下载组件
+                return gr.File(
+                    value=file_path,
+                    visible=True,
+                    label=f"下载文件: {selected_row[0]}"
+                )
+
+            return gr.File(visible=False)
+
+        except Exception as e:
+            print(f"文件选择错误: {e}")
+            return gr.File(visible=False)
+
+
+    # 当用户选择文件时触发下载
+    file_table.select(
+        fn=handle_file_selection,
+        inputs=[current_user, file_table],
+        outputs=file_download
     )
 
     gr.Markdown("© 2025 智能医疗诊断系统 | 版权所有", elem_id="footer")
