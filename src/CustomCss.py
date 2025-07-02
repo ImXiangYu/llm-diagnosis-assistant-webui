@@ -2,8 +2,28 @@
 custom_css ="""
 /* 背景页面淡蓝色 */
 .gradio-container {
+    background-image: url('https://www.cqu.edu.cn/images/23/10/11/1ucry5xfsw/%E8%99%8E%E6%BA%AA%E4%BA%91%E6%B9%96%E6%B0%B4%E5%BD%B1.jpg'); /* 替换为你的背景图片URL */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-color: #f2f6fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 添加一个半透明遮罩层 */
+.gradio-container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(255, 255, 255, 0.5); /* 白色半透明遮罩，透明度可调 */
+    z-index: 0;
+}
+
+/* 确保容器内其他内容在遮罩上方 */
+.gradio-container > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* 清空按钮 */

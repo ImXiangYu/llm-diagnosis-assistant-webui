@@ -1,9 +1,9 @@
 # 登录逻辑
-import time
-
-from src import database
 import gradio as gr
+
 from Model import ask_medical_llm
+from src import database
+
 
 def handle_login(username, password):
     user_id = database.authenticate_user(username, password)
@@ -19,16 +19,24 @@ def handle_register(username, password):
 
 # 登录逻辑
 def on_login(username, password):
+    if not username:
+        return "用户名不能为空", gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), None
+    if not password:
+        return "密码不能为空", gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), None
     msg, success, current_user = handle_login(username, password)
     return msg, gr.update(visible=not success), gr.update(visible=False), gr.update(visible=success), current_user
 
 # 注册逻辑
 def on_register(username, password):
+    if not username:
+        return "用户名不能为空", gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), None
+    if not password:
+        return "密码不能为空", gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), None
     success, msg = handle_register(username, password)
     if success:
         _, _, current_user = handle_login(username, password)
         return msg, gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), current_user
-    return msg, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
+    return msg, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), None
 
 # 查询文件逻辑
 def handle_query_files(user):
