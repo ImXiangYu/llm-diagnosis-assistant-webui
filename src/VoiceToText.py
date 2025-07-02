@@ -16,12 +16,22 @@ from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 import tempfile
 import soundfile as sf
+
 # 换成了通义的SenseVoiceSmall，效果比之前的Whisper要好很多
 asr_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='iic/SenseVoiceSmall',
     model_revision="master",
-    device="cuda:0",)
+    device="cuda:0",
+)
+
+# 标点恢复模型
+punc_pipeline = pipeline(
+    task=Tasks.punctuation,
+    model='iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
+    model_revision="v2.0.4",
+    device="cuda:0",  # 如果你想使用 GPU，确保该模型也支持
+)
 
 # 语音转文字 Function
 def transcribe(audio):
@@ -41,7 +51,11 @@ def transcribe(audio):
         result = asr_pipeline(f.name)
 
     try:
-        return clean_text(result[0]["text"])
+        raw_text = clean_text(result[0]["text"])
+        # 添加标点
+        punc_result = punc_pipeline(raw_text)
+        final_text = punc_result[0]["text"]
+        return final_text
     except Exception as e:
         print("识别失败：", e)
         return "语音识别失败，请重试"
