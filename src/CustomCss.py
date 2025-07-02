@@ -21,6 +21,7 @@ h1 {
 
 /* Markdown 标题样式 */
 h2 {
+    text-align: center;
     color: #1e40af;
     margin-bottom: 20px;
 }
@@ -77,7 +78,7 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 
 /* PDF生成 */
 #PDF-File {
-        height: 50px; /* 自定义高度 */
+        height: 70px; /* 自定义高度 */
         overflow-y: auto;
         border: 1px solid #ccc;
         padding: 10px;

@@ -1,6 +1,6 @@
 import gradio as gr
 from src.CustomCss import custom_css
-from src.OperationFunc import handle_login, handle_register, handle_query_files, handle_file_selection, \
+from src.OperationFunc import handle_query_files, handle_file_selection, \
     save_uploaded_image, chat, generate_pdf, handle_logout, on_register, on_login
 
 # 声音转文字
@@ -35,13 +35,13 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
     # 主界面
     with gr.Column(visible=False) as main_panel:
         with gr.Row(equal_height=True):
-            gr.Markdown("")
-            gr.Markdown("# 智渝——智慧医疗辅诊系统")
-            with gr.Column():
+            with gr.Row(equal_height=True):
                 user_label = gr.Markdown()
-                with gr.Row(equal_height=True):
-                    logout_btn = gr.Button("🚪 退出登录", size="sm")
-                    gr.Markdown("")
+            gr.Markdown("# 智渝——智慧医疗辅诊系统")
+            with gr.Row(equal_height=True):
+                gr.Markdown("")
+                logout_btn = gr.Button("🚪 退出登录", size="sm")
+                gr.Markdown("")
 
         # 顶部：病人信息填写
         with gr.Row():
@@ -56,7 +56,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                 with gr.Row():
                     # 左侧：聊天界面
                     with gr.Column(scale=1):
-                        chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=280)
+                        chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=300)
                         msg = gr.Textbox(label="输入您的病情描述")
                         with gr.Row():
                             clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
@@ -125,7 +125,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
 
     # 用户名显示
     current_user.change(
-        lambda u: f"### 👤 当前用户：**{u[1]}**" if u else "",
+        lambda u: f"## 👤 当前用户：**{u[1]}**" if u else "",
         inputs=current_user,
         outputs=user_label
     )
