@@ -32,6 +32,11 @@ custom_css ="""
     color: white;
 }
 
+#normal-btn {
+    background-color: #90EE90;
+    color: #1D4ED8;
+}
+
 /* Markdown 标题样式 */
 h1 {
     text-align: center;
