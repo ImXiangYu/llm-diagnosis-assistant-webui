@@ -40,9 +40,9 @@ def register_user(username, password):
     try:
         cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
-        return True, "注册成功"
+        return True, "注册成功，即将跳转登录"
     except sqlite3.IntegrityError:
-        return False, "用户名已存在"
+        return False, "注册失败，用户名已存在"
     finally:
         conn.close()
 

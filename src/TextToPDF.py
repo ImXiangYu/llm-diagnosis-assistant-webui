@@ -6,7 +6,7 @@ from docxtpl import DocxTemplate
 import win32com.client
 
 def TextToPDF(name, gender, age, phone,
-              chief_complaint="无", examinations="无", diagnosis="无", disposal="无"):
+              chief_complaint="无", examinations="无", diagnosis="无", disposal="无", username="wys"):
     doc = DocxTemplate("../Template/template.docx")
 
     context = {
@@ -17,7 +17,8 @@ def TextToPDF(name, gender, age, phone,
         "chief_complaint": chief_complaint,
         "examinations": examinations,
         "diagnosis": diagnosis,
-        "disposal": disposal
+        "disposal": disposal,
+        "username": username
     }
 
     doc.render(context)
