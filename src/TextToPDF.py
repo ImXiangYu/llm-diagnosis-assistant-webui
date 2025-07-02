@@ -18,7 +18,8 @@ def TextToPDF(name, gender, age, phone,
         "examinations": examinations,
         "diagnosis": diagnosis,
         "disposal": disposal,
-        "username": username
+        "username": username,
+        "date": time.strftime("%Y.%m.%d")
     }
 
     doc.render(context)

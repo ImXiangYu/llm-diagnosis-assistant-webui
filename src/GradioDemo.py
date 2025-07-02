@@ -1,6 +1,6 @@
 import gradio as gr
 from src.CustomCss import custom_css
-from src.OperationFunc import handle_login, handle_register, handle_query_files, handle_file_selection, \
+from src.OperationFunc import handle_query_files, handle_file_selection, \
     save_uploaded_image, chat, generate_pdf, handle_logout, on_register, on_login
 
 # 声音转文字
@@ -19,8 +19,8 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
         gr.Markdown("# 欢迎登录")
         login_user = gr.Textbox(label="用户名")
         login_pass = gr.Textbox(label="密码", type="password")
-        login_btn = gr.Button("登录")
-        to_register_btn = gr.Button("没有账号？去注册", variant="secondary")
+        login_btn = gr.Button("登录", elem_id="normal-btn")
+        to_register_btn = gr.Button("没有账号？去注册", variant="secondary", elem_id="normal-btn")
         login_info = gr.Markdown("")
 
     # 注册页面
@@ -28,20 +28,20 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
         gr.Markdown("# 欢迎注册")
         reg_user = gr.Textbox(label="用户名")
         reg_pass = gr.Textbox(label="密码", type="password")
-        reg_btn = gr.Button("注册", scale=1)
-        to_login_btn = gr.Button("已有账号？去登录", variant="secondary")
+        reg_btn = gr.Button("注册", scale=1, elem_id="normal-btn")
+        to_login_btn = gr.Button("已有账号？去登录", variant="secondary", elem_id="normal-btn")
         reg_info = gr.Markdown("注册成功后会自动跳转至主页面")
 
     # 主界面
     with gr.Column(visible=False) as main_panel:
         with gr.Row(equal_height=True):
-            gr.Markdown("")
-            gr.Markdown("# 智渝——智慧医疗辅诊系统")
-            with gr.Column():
+            with gr.Row(equal_height=True):
                 user_label = gr.Markdown()
-                with gr.Row(equal_height=True):
-                    logout_btn = gr.Button("🚪 退出登录", size="sm")
-                    gr.Markdown("")
+            gr.Markdown("# 智渝——智慧医疗辅诊系统")
+            with gr.Row(equal_height=True):
+                gr.Markdown("")
+                logout_btn = gr.Button("🚪 退出登录", size="sm", elem_id="clear-btn")
+                gr.Markdown("")
 
         # 顶部：病人信息填写
         with gr.Row():
@@ -56,13 +56,13 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                 with gr.Row():
                     # 左侧：聊天界面
                     with gr.Column(scale=1):
-                        chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=280)
+                        chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=300)
                         msg = gr.Textbox(label="输入您的病情描述")
                         with gr.Row():
                             clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
                                                        elem_id="clear-btn")
-                            transcribe_btn = gr.Button("识别语音")
-                            send_btn = gr.Button("发送")
+                            transcribe_btn = gr.Button("识别语音", elem_id="normal-btn")
+                            send_btn = gr.Button("发送", elem_id="normal-btn")
                         with gr.Row():
                             audio_input = gr.Audio(sources=["microphone"], label="语音输入")
                         transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
@@ -73,7 +73,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                         examinations_box = gr.Textbox(label="辅助检查", lines=2)
                         diagnosis_box = gr.Textbox(label="诊断", lines=2)
                         disposal_box = gr.Textbox(label="处置意见", lines=2)
-                        generate_btn = gr.Button("生成病历PDF")
+                        generate_btn = gr.Button("生成病历PDF", elem_id="normal-btn")
                         file_output = gr.File(label="下载PDF", elem_id="PDF-File")
 
 
@@ -92,7 +92,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                 with gr.Column():
                     gr.Markdown("### 📂 历史病历")
                     with gr.Row():
-                        query_btn = gr.Button("🔍 查询历史病历")
+                        query_btn = gr.Button("🔍 查询历史病历", elem_id="normal-btn")
 
                     # 文件列表显示 - 使用DataFrame
                     file_table = gr.DataFrame(
@@ -125,7 +125,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
 
     # 用户名显示
     current_user.change(
-        lambda u: f"### 👤 当前用户：**{u[1]}**" if u else "",
+        lambda u: f"## 👤 当前用户：**{u[1]}**" if u else "",
         inputs=current_user,
         outputs=user_label
     )
