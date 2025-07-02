@@ -1,4 +1,6 @@
 # 登录逻辑
+import time
+
 from src import database
 import gradio as gr
 from Model import ask_medical_llm
@@ -6,21 +8,27 @@ from Model import ask_medical_llm
 def handle_login(username, password):
     user_id = database.authenticate_user(username, password)
     if user_id:
-        return (
-            "",
-            gr.update(visible=False),
-            gr.update(visible=False),
-            gr.update(visible=True),
-            (user_id, username)
-        )
+        return "", True, (user_id, username)
     else:
-        return "❌ 用户名或密码错误", gr.update(), gr.update(), gr.update(visible=False), None, ""
-
+        return "❌ 用户名或密码错误", False, None
 
 # 注册逻辑
 def handle_register(username, password):
     ok, this_msg = database.register_user(username, password)
-    return this_msg, gr.update(visible=True) if ok else gr.update()
+    return ok, this_msg
+
+# 登录逻辑
+def on_login(username, password):
+    msg, success, current_user = handle_login(username, password)
+    return msg, gr.update(visible=not success), gr.update(visible=False), gr.update(visible=success), current_user
+
+# 注册逻辑
+def on_register(username, password):
+    success, msg = handle_register(username, password)
+    if success:
+        _, _, current_user = handle_login(username, password)
+        return msg, gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), current_user
+    return msg, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
 
 # 查询文件逻辑
 def handle_query_files(user):
@@ -128,3 +136,8 @@ def save_uploaded_image(image_path):
     print(f"图片已保存到：{save_path}")
 
     return save_path  # 用于在界面上显示
+
+# 退出登录逻辑
+def handle_logout():
+    # 返回值顺序应对应下面 outputs 的顺序
+    return None, gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), "", [], "", "", "", "", ""
