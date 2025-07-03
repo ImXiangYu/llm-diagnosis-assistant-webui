@@ -95,18 +95,19 @@ def handle_file_selection(user, data, evt: gr.SelectData):
 def chat(user_input, history):
     print("--------------已开启新一轮调用--------------")
     result = ask_medical_llm(user_input)
+
+    print("--------------result--------------")
+    print(result)
+
     # 用于模型记录输出
     medical_data = {}
     medical_data.update(result)
 
     history.append({"role": "user", "content": user_input})
-    history.append({"role": "assistant", "content":
-        "主诉：" + result["chief_complaint"] + "\n" +
-        "辅助检查：" + result["examinations"] + "\n" +
-        "诊断：" + result["diagnosis"] + "\n" +
-        "处置意见：" + result["disposal"]})
+    history.append({"role": "assistant", "content": result["original"]})
 
     print("--------------history--------------")
+    print(history)
     return "", history, result["chief_complaint"], result["examinations"], result["diagnosis"], result["disposal"]
 
 # 生成PDF
