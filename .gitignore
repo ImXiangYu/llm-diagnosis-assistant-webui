@@ -4,3 +4,4 @@ SavedMedicalRecords/
 UploadedImages/
 UserFiles/
 app.db
+.gradio/

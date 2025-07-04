@@ -2,7 +2,7 @@
 import gradio as gr
 
 from Model import ask_medical_llm
-from src import database
+import database
 
 
 def handle_login(username, password):
