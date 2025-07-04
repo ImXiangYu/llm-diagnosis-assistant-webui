@@ -1,0 +1,9 @@
+gradio
+docxtpl
+modelscope
+addict
+datasets==3.3.2
+soundfile
+simplejson
+sortedcontainers
+modelscope[audio]

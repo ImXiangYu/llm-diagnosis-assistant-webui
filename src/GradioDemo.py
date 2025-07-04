@@ -1,11 +1,9 @@
 import gradio as gr
-from src.CustomCss import custom_css
-from src.OperationFunc import handle_query_files, handle_file_selection, \
-    chat, generate_pdf, handle_logout, on_register, on_login, \
-    image_report_generate
+from CustomCss import custom_css
+from OperationFunc import *
 
 # 声音转文字
-from src.VoiceToText import transcribe
+from VoiceToText import transcribe
 
 # 初始化数据库
 import database
