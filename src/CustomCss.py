@@ -17,7 +17,7 @@ custom_css ="""
 /* 主体内容自动占据剩余空间 */
 #main-content {
     flex: 1;
-    min-height: 600px;
+    min-height: 670px;
 }
 
 

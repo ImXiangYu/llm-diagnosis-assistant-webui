@@ -1,6 +1,8 @@
 import gradio as gr
 from CustomCss import custom_css
-from OperationFunc import *
+from OperationFunc import handle_query_files, handle_file_selection, \
+    chat, generate_pdf, handle_logout, on_register, on_login, \
+    image_report_generate
 
 # 声音转文字
 from VoiceToText import transcribe
