@@ -127,6 +127,15 @@ def generate_pdf(this_name, this_gender, this_age, this_phone,
     database.add_user_file(user_id, pdf_filename)
     return pdf_path
 
+from ImageToPDF import ImageToPDF
+def image_report_generate(this_name, this_gender, this_age, this_phone, this_current_user):
+    print("正在保存影像报告...")
+    saved_image_report = ImageToPDF(this_name, this_gender, this_age, this_phone, username=this_current_user[1])
+    image_report_filename = saved_image_report[1]
+    image_report_path = saved_image_report[0]
+    user_id = this_current_user[0]
+    database.add_user_file(user_id, image_report_filename)
+    return image_report_path
 
 # 支持用户上传图片（例如影像报告）
 import shutil
