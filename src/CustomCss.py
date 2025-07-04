@@ -2,6 +2,10 @@
 custom_css ="""
 /* 背景页面淡蓝色 */
 .gradio-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
     background-image: url('https://www.cqu.edu.cn/images/23/10/11/1ucry5xfsw/%E8%99%8E%E6%BA%AA%E4%BA%91%E6%B9%96%E6%B0%B4%E5%BD%B1.jpg'); /* 替换为你的背景图片URL */
     background-size: cover;
     background-position: center;
@@ -9,6 +13,13 @@ custom_css ="""
     background-color: #f2f6fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+/* 主体内容自动占据剩余空间 */
+#main-content {
+    flex: 1;
+    min-height: 600px;
+}
+
 
 /* 添加一个半透明遮罩层 */
 .gradio-container::before {
@@ -93,13 +104,17 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* 页脚 */
+/* 页脚样式 */
 #footer {
     text-align: center;
     font-size: 12px;
     color: #999;
-    margin-top: 20px;
+    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
 }
+
 
 /* PDF生成 */
 #PDF-File {
