@@ -1,12 +1,11 @@
-# TextToPDF.py
+# ImageToPDF.py
 import os
 import time
 import pythoncom
 from docxtpl import DocxTemplate
 import win32com.client
 
-def TextToPDF(name, gender, age, phone,
-              chief_complaint="无", examinations="无", diagnosis="无", disposal="无", username="wys"):
+def ImageToPDF(name, gender, age, phone, username):
     doc = DocxTemplate("../Template/MedicalReportTemplate.docx")
 
     context = {
@@ -14,21 +13,15 @@ def TextToPDF(name, gender, age, phone,
         "gender": gender,
         "age": age,
         "phone": phone,
-        "chief_complaint": chief_complaint,
-        "examinations": examinations,
-        "diagnosis": diagnosis,
-        "disposal": disposal,
-        "username": username,
-        "date": time.strftime("%Y.%m.%d")
     }
 
     doc.render(context)
 
     local_time = time.strftime("%Y_%m_%d_%H_%M", time.localtime())
-    word_filename = f"病历_{name}_{local_time}.docx"
-    pdf_filename = f"病历_{name}_{local_time}.pdf"
-    word_path = "SavedMedicalRecords/" + word_filename
-    pdf_path = "SavedMedicalRecords/" + pdf_filename
+    word_filename = f"医学影像报告_{name}_{local_time}.docx"
+    pdf_filename = f"医学影像报告_{name}_{local_time}.pdf"
+    word_path = "SavedImageRecords/" + word_filename
+    pdf_path = "SavedImageRecords/" + pdf_filename
 
     doc.save(word_path)
 

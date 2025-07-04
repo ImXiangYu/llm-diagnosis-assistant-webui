@@ -1,7 +1,8 @@
 import gradio as gr
 from src.CustomCss import custom_css
 from src.OperationFunc import handle_query_files, handle_file_selection, \
-    save_uploaded_image, chat, generate_pdf, handle_logout, on_register, on_login
+    chat, generate_pdf, handle_logout, on_register, on_login, \
+    image_report_generate
 
 # 声音转文字
 from src.VoiceToText import transcribe
@@ -53,12 +54,11 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
 
             with gr.Tabs():
                 with gr.Tab("文本诊疗"):
-            # 中间：左右布局
                     with gr.Row():
                         # 左侧：聊天界面
                         with gr.Column(scale=1):
                             chatbot = gr.Chatbot(label="诊疗对话", type="messages", height=300)
-                            msg = gr.Textbox(label="输入您的病情描述")
+                            msg = gr.Textbox(label="请输入您的病情描述")
                             with gr.Row():
                                 clear_btn = gr.ClearButton([msg, chatbot], value="清空对话",
                                                            elem_id="clear-btn")
@@ -79,15 +79,33 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
 
 
                 with gr.Tab("图像处理"):
-                    # 上传图片, 自动保存, 显示
-                    image_input = gr.Image(type="filepath", label="上传图片")
-                    uploaded_image = gr.Image(label="显示上传图片")
+                    with gr.Row():
+                        # 左侧：聊天界面
+                        with gr.Column(scale=1):
+                            image_chatbot = gr.Chatbot(label="医学影像分析", type="messages", height=300)
+                            image_msg = gr.Textbox(label="请输入描述")
+                            with gr.Row():
+                                image_clear_btn = gr.ClearButton([image_msg, image_chatbot], value="清空对话",
+                                                           elem_id="clear-btn")
+                                image_transcribe_btn = gr.Button("识别语音", elem_id="normal-btn")
+                                image_send_btn = gr.Button("发送", elem_id="normal-btn")
+                            with gr.Row():
+                                image_audio_input = gr.Audio(sources=["microphone"], label="语音输入")
+                            image_transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
 
-                    image_input.change(
-                        save_uploaded_image,
-                        inputs=image_input,
-                        outputs=uploaded_image
-                    )
+                        # 右侧：可编辑框和PDF生成
+                        with gr.Column(scale=1):
+                            # 上传图片, 自动保存, 显示
+                            image_input = gr.Image(type="filepath", label="上传医学影像")
+                            # uploaded_image = gr.Image(label="已上传的医学影像")
+                            # image_input.change(
+                            #     save_uploaded_image,
+                            #     inputs=image_input,
+                            #     outputs=uploaded_image
+                            # )
+                            # uploaded_image即上传的图片
+                            image_report_generate_btn = gr.Button("生成医学影像报告", elem_id="normal-btn")
+                            image_report_output = gr.File(label="下载报告", elem_id="PDF-File")
 
                 with gr.Tab("历史病历查询"):
                     with gr.Column():
@@ -137,6 +155,13 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
         inputs=[name, gender, age, phone, chief_complaint_box,
                 examinations_box, diagnosis_box, disposal_box, current_user],
         outputs=file_output
+    )
+
+    # 医学影像报告生成
+    image_report_generate_btn.click(
+        image_report_generate,
+        inputs=[name, gender, age, phone],
+        outputs=image_report_output
     )
 
     query_btn.click(
