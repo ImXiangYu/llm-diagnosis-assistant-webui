@@ -1,7 +1,7 @@
 import gradio as gr
 from CustomCss import custom_css
-from OperationFunc import handle_operation, handle_query_files, handle_file_selection, \
-    chat, generate_pdf, handle_logout, make_table_html, on_register, on_login, \
+from OperationFunc import handle_query_files, handle_file_selection, \
+    chat, generate_pdf, handle_logout, on_register, on_login, \
     image_report_generate
 
 # 声音转文字
@@ -110,21 +110,18 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                 with gr.Tab("历史病例查询"):
                     with gr.Column():
                         gr.Markdown("### 📂 历史病例")
-                        query_btn = gr.Button("🔍 查询历史病例", elem_id="normal-btn")
-                
-                        # 1) 用 HTML 渲染表格
-                        table_html = gr.HTML(elem_id="file-table")
-                
-                        # 2) 两个隐藏的 Textbox：存文件名 和 存操作类型
-                        hidden_fn     = gr.Textbox(visible=False, elem_id="hidden-fn")
-                        hidden_action = gr.Textbox(visible=False, elem_id="hidden-action")
-                
-                        # 3) 一个隐藏的按钮，JS 触发它来跑后端回调
-                        trigger_btn   = gr.Button(visible=False, elem_id="trigger-op")
-                
-                        # 4) 下载区域：File 和 Markdown（成功/错误消息）
-                        file_download = gr.File(visible=False)
-                        op_msg        = gr.Markdown(visible=False)
+                        with gr.Row():
+                            query_btn = gr.Button("🔍 查询历史病例", elem_id="normal-btn")
+
+                        # 文件列表显示 - 使用DataFrame
+                        file_table = gr.DataFrame(
+                            headers=["病例", "操作"],
+                            datatype=["str", "str"],
+                            interactive=False,
+                            wrap=True
+                        )
+                    # 隐藏文件下载组件
+                    file_download = gr.File(label="文件下载", visible=False)
 
     # 绑定事件
     send_btn.click(
@@ -168,14 +165,17 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
     )
 
     query_btn.click(
-        fn=make_table_html,       # 下面我们会在 OperationFunc.py 里新写这个函数
-        inputs=[current_user],
-        outputs=[table_html]
+        fn=handle_query_files,
+        inputs=current_user,
+        outputs=file_table
     )
-    trigger_btn.click(
-        fn=handle_operation,
-        inputs=[current_user, hidden_fn, hidden_action],
-        outputs=[file_download, op_msg]
+
+
+    # 当用户选择文件时触发下载
+    file_table.select(
+        fn=handle_file_selection,
+        inputs=[current_user, file_table],
+        outputs=file_download
     )
 
     # 退出登录

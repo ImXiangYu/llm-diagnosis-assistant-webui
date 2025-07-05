@@ -123,40 +123,4 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
         border: 1px solid #ccc;
         padding: 10px;
 }
-/* 历史病例表格美化 */
-.gr-html table {
-    border: none !important;
-}
-.styled-table {
-    width: 100%;
-    background-color: white;
-    border: 1px solid #5EE7FF !important;
-    border-radius: 6px;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 1em 0;
-    font-size: 0.9em;
-    font-family: sans-serif;
-}
-.styled-table thead tr {
-    background-color: #ADD8E6;
-    color: #333;
-    text-align: left;
-    border-bottom: 1px solid #ADD8E6 !important;
-}
-.styled-table th,
-.styled-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ADD8E6 !important;
-    border-color: #5EE7FF !important;
-}
-.styled-table tbody tr:last-of-type td {
-    border-bottom: none;
-}
-
-/* 右列略窄 */
-.styled-table td:nth-child(2) {
-    width: 30%;
-}
-
 """
