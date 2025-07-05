@@ -161,3 +161,25 @@ def save_uploaded_image(image_path):
 def handle_logout():
     # 返回值顺序应对应下面 outputs 的顺序
     return None, gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), "", [], "", "", "", "", ""
+
+# 上传知识库文件
+def save_uploaded_file(file):
+    upload_file_dir = "UploadedFiles"
+    os.makedirs(upload_file_dir, exist_ok=True)
+    if file is not None:
+        file_path = os.path.join(upload_file_dir, os.path.basename(file.name))
+        shutil.copy(file.name, file_path)
+        print(f"{file.name}, 上传成功")
+        return "# " + os.path.basename(file.name) + " 上传成功！"
+    return "# 未选择任何文件 上传失败！"
+
+def list_uploaded_files():
+    upload_file_dir = "UploadedFiles"
+    os.makedirs(upload_file_dir, exist_ok=True)
+    files = [
+        os.path.join(upload_file_dir, f)
+        for f in os.listdir(upload_file_dir)
+        if os.path.isfile(os.path.join(upload_file_dir, f))
+    ]
+    print("已列出所有文件")
+    return files

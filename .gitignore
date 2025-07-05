@@ -1,8 +1,9 @@
-.idea/
-__pycache__/
 SavedMedicalRecords/病历*
 SavedImageRecords/医学影像报告*
 UploadedImages/
+UploadedFiles/
+__pycache__/
 UserFiles/
-app.db
 .gradio/
+.idea/
+app.db
