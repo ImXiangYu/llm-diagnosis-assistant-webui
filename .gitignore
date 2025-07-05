@@ -1,6 +1,7 @@
 .idea/
 __pycache__/
 SavedMedicalRecords/
+SavedImageRecords/
 UploadedImages/
 UserFiles/
 app.db
