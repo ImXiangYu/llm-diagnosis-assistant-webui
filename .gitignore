@@ -1,7 +1,7 @@
 .idea/
 __pycache__/
-SavedMedicalRecords/
-SavedImageRecords/
+SavedMedicalRecords/病历*
+SavedImageRecords/医学影像报告*
 UploadedImages/
 UserFiles/
 app.db

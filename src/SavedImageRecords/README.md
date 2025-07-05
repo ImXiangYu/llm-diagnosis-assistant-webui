@@ -1,7 +1,7 @@
 医学影像会默认保存在这里
 
 保存格式为：
-医学影像_{name}\_{local_time}.pdf
+医学影像报告_{name}\_{local_time}.pdf
 
 name为填入的病人名
 
