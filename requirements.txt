@@ -7,3 +7,5 @@ soundfile
 simplejson
 sortedcontainers
 modelscope[audio]
+requests
+numpy

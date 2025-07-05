@@ -118,9 +118,17 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 
 /* PDF生成 */
 #PDF-File {
-        height: 70px; /* 自定义高度 */
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        padding: 10px;
+    height: 70px; /* 自定义高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+/* 医学影像上传 */
+#image-upload {
+    height: 188px; /* 自定义高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
 }
 """

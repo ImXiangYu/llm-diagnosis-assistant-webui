@@ -2,7 +2,7 @@ import gradio as gr
 from CustomCss import custom_css
 from OperationFunc import handle_query_files, handle_file_selection, \
     chat, generate_pdf, handle_logout, on_register, on_login, \
-    image_report_generate
+    image_report_generate, save_uploaded_image
 
 # 声音转文字
 from VoiceToText import transcribe
@@ -78,7 +78,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                             file_output = gr.File(label="下载PDF", elem_id="PDF-File")
 
 
-                with gr.Tab("图像处理"):
+                with gr.Tab("医学影像分析"):
                     with gr.Row():
                         # 左侧：聊天界面
                         with gr.Column(scale=1):
@@ -96,14 +96,20 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                         # 右侧：可编辑框和PDF生成
                         with gr.Column(scale=1):
                             # 上传图片, 自动保存, 显示
-                            image_input = gr.Image(type="filepath", label="上传医学影像")
-                            # uploaded_image = gr.Image(label="已上传的医学影像")
-                            # image_input.change(
-                            #     save_uploaded_image,
-                            #     inputs=image_input,
-                            #     outputs=uploaded_image
-                            # )
                             # uploaded_image即上传的图片
+                            image_input = gr.Image(type="filepath", label="上传医学影像", elem_id="image-upload")
+                            uploaded_image = gr.Image(label="已上传的医学影像", visible=False)
+
+                            image_path_box = gr.Textbox(label="医学影像路径占位符", visible=False)
+
+                            image_input.change(
+                                save_uploaded_image,
+                                inputs=image_input,
+                                outputs=[uploaded_image, image_path_box]
+                            )
+                            description_box = gr.Textbox(label="影像所见", lines=2)
+                            imaging_diagnosis_box = gr.Textbox(label="影像诊断", lines=2)
+
                             image_report_generate_btn = gr.Button("生成医学影像报告", elem_id="normal-btn")
                             image_report_output = gr.File(label="下载报告", elem_id="PDF-File")
 
@@ -160,7 +166,8 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
     # 医学影像报告生成
     image_report_generate_btn.click(
         image_report_generate,
-        inputs=[name, gender, age, phone],
+        inputs=[name, gender, age, phone, current_user,
+                diagnosis_box, image_path_box, description_box, imaging_diagnosis_box],
         outputs=image_report_output
     )
 
