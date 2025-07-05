@@ -39,13 +39,10 @@ def on_register(username, password):
     return msg, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), None
 
 # 查询文件逻辑
-def handle_query_files(user):
-    if not user:
-        return "❌ 请先登录", None
-
-    files = database.get_user_files(user[0])
+def handle_query_files():
+    files = database.get_patient_cases()
     file_data = [
-        [f["name"], f"📥 下载"]
+        [f"门诊号：{f['id']}，姓名：{f['name']}", f"📥 下载病历", f"📥 下载影像报告", f"📥 导入信息"]
         for f in files
     ]
 
@@ -66,16 +63,27 @@ def handle_file_selection(user, data, evt: gr.SelectData):
         # 获取选中的行索引
         selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
         row_index = selected_idx[0]
+        col_index = selected_idx[1]
 
-        # 获取选中的行数据
-        # selected_data = data.iat[selected_idx[0], selected_idx[1]]
+        # 只允许点击第二列（索引为1）时触发下载
+        if col_index != 1:
+            return gr.File(visible=False)
         selected_row = data.iloc[row_index]
-        # print(selected_row)
+        print(selected_row[0])
 
         # 行数据分两个，[file_name, button]
         # 从行数据中提取file_name
         # 获取文件路径
-        file_path = database.get_file_by_filename(selected_row[0])
+        # selected_row[0] 形如 "门诊号：123，姓名：张三"
+        try:
+            id_str = selected_row[0].split('，')[0]  # "门诊号：123"
+            patient_id = int(id_str.split('：')[1])
+        except Exception as e:
+            print(f"解析门诊号失败: {e}")
+            return gr.File(visible=False)
+        print(patient_id)
+        print(type(patient_id))
+        file_path = database.get_record_by_id(patient_id)
         if file_path and os.path.exists(file_path):
             # 返回可见的文件下载组件
             return gr.File(

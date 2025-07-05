@@ -115,10 +115,11 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
 
                         # 文件列表显示 - 使用DataFrame
                         file_table = gr.DataFrame(
-                            headers=["病例", "操作"],
+                            headers=["病例", "操作","",""],
                             datatype=["str", "str"],
                             interactive=False,
-                            wrap=True
+                            wrap=False,
+                            elem_classes="gradio-dataframe"
                         )
                     # 隐藏文件下载组件
                     file_download = gr.File(label="文件下载", visible=False)
@@ -166,7 +167,6 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
 
     query_btn.click(
         fn=handle_query_files,
-        inputs=current_user,
         outputs=file_table
     )
 

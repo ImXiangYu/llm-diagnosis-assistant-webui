@@ -123,14 +123,12 @@ def export_patient_file(name, gender, age, phone, condition_description, auxilia
     finally:
         conn.close()
 
-def get_user_files(user_id):
+def get_patient_cases():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("""
-                   SELECT id, file_name, file_path
-                   FROM files
-                   WHERE user_id = ?
-                   """, (user_id,))
+                   SELECT * FROM patients
+                   """)
 
     files = []
     for row in cursor.fetchall():
@@ -140,7 +138,14 @@ def get_user_files(user_id):
         })
     conn.close()
     return files
-
+def get_record_by_id(patient_id):
+    """根据患者ID获取患者信息"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?", (patient_id,"病历%"))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None
 def get_file_by_filename(file_name):
     """根据filename获取文件路径"""
     conn = sqlite3.connect(DB_FILE)
