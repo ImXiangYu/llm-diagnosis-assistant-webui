@@ -2,7 +2,7 @@
 import gradio as gr
 
 from Model import ask_medical_llm
-from src import database
+import database
 
 
 def handle_login(username, password):
@@ -112,8 +112,11 @@ def chat(user_input, history):
 
 # 生成PDF
 from TextToPDF import TextToPDF
-def generate_pdf(this_name, this_gender, this_age, this_phone,
+def generate_pdf(this_name, this_gender, this_age, this_phone, condition_description,
                  chief, exam, diag, disp, this_current_user):
+    if not this_current_user:
+        print("当前用户信息为空，无法生成PDF")
+        return None
     # this_current_user: [user_id, username]
     print("正在准备保存为PDF...")
     saved_pdf = TextToPDF(this_name, this_gender, this_age, this_phone,
@@ -124,8 +127,19 @@ def generate_pdf(this_name, this_gender, this_age, this_phone,
     pdf_filename = saved_pdf[1]
     pdf_path = saved_pdf[0]
     user_id = this_current_user[0]
-    database.add_user_file(user_id, pdf_filename)
+    success, patient_id = database.export_patient_file(
+        this_name, this_gender, this_age, this_phone, condition_description, auxiliary_examination=None
+    )
+    if not success:
+        print("导入患者信息失败，无法关联文件")
+        return None
+    saved = database.add_user_file(user_id, pdf_filename, patient_id)
+    if not saved:
+        print("保存文件记录失败")
+    else:
+        print(f"PDF {pdf_filename} 已保存并关联到患者 {patient_id}")
     return pdf_path
+
 
 from ImageToPDF import ImageToPDF
 def image_report_generate(this_name, this_gender, this_age, this_phone, this_current_user):

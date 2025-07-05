@@ -107,15 +107,15 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                             image_report_generate_btn = gr.Button("生成医学影像报告", elem_id="normal-btn")
                             image_report_output = gr.File(label="下载报告", elem_id="PDF-File")
 
-                with gr.Tab("历史病历查询"):
+                with gr.Tab("历史病例查询"):
                     with gr.Column():
-                        gr.Markdown("### 📂 历史病历")
+                        gr.Markdown("### 📂 历史病例")
                         with gr.Row():
-                            query_btn = gr.Button("🔍 查询历史病历", elem_id="normal-btn")
+                            query_btn = gr.Button("🔍 查询历史病例", elem_id="normal-btn")
 
                         # 文件列表显示 - 使用DataFrame
                         file_table = gr.DataFrame(
-                            headers=["文件名", "操作"],
+                            headers=["病例", "操作"],
                             datatype=["str", "str"],
                             interactive=False,
                             wrap=True
@@ -152,7 +152,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
     # PDF生成
     generate_btn.click(
         generate_pdf,
-        inputs=[name, gender, age, phone, chief_complaint_box,
+        inputs=[name, gender, age, phone, msg, chief_complaint_box,
                 examinations_box, diagnosis_box, disposal_box, current_user],
         outputs=file_output
     )

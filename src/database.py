@@ -20,20 +20,35 @@ def init_db():
             password TEXT NOT NULL
         )
     ''')
-
+    # 创建病人信息表
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS patients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            gender TEXT,
+            age INTEGER,
+            phone TEXT,
+            condition_description TEXT,
+            auxiliary_examination TEXT
+        )
+    ''')
     # 创建文件表 - 添加文件路径和唯一标识字段
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS files (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
+            patient_id INTEGER,
             file_name TEXT,
             file_path TEXT UNIQUE NOT NULL,
-            FOREIGN KEY(user_id) REFERENCES users(id)
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(patient_id) REFERENCES patients(id)
         )
     ''')
+
+    
     conn.commit()
     conn.close()
-
+    
 def register_user(username, password):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -54,7 +69,7 @@ def authenticate_user(username, password):
     conn.close()
     return result[0] if result else None
 
-def add_user_file(user_id, file_name):
+def add_user_file(user_id, file_name, patient_id):
     """添加用户文件到数据库和文件系统"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -65,14 +80,46 @@ def add_user_file(user_id, file_name):
 
         # 保存文件信息到数据库
         cursor.execute(
-            "INSERT INTO files (user_id, file_name, file_path) VALUES (?, ?, ?)",
-            (user_id, file_name, file_path)
+            "INSERT INTO files (user_id, file_name, file_path, patient_id) VALUES (?, ?, ?, ?)",
+            (user_id, file_name, file_path, patient_id)
         )
         conn.commit()
         return True
     except Exception as e:
         print(f"保存文件出错: {e}")
         return False
+    finally:
+        conn.close()
+
+def export_patient_file(name, gender, age, phone, condition_description, auxiliary_examination):
+    """
+    将患者信息导入patients表。
+
+    参数：
+    - name: 患者姓名
+    - gender: 性别
+    - age: 年龄
+    - phone: 电话
+    - condition_description: 病情描述
+    - auxiliary_examination: 辅助检查
+    返回：
+    - True, 新增记录的门诊号
+    - False, 插入失败
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO patients (name, gender, age, phone, condition_description, auxiliary_examination)"
+            " VALUES (?, ?, ?, ?, ?, ?)",
+            (name, gender, age, phone, condition_description, auxiliary_examination)
+        )
+        conn.commit()
+        outpatient_number = cursor.lastrowid
+        return True, outpatient_number
+    except Exception as e:
+        print(f"导入患者信息出错: {e}")
+        return False, None
     finally:
         conn.close()
 
