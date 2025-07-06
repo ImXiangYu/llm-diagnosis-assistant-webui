@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 DB_FILE = "app.db"
-USER_FILES_DIR = "SavedMedicalRecords"  # 存储用户文件的目录
+USER_FILES_DIR = "../SavedMedicalRecords"  # 存储用户文件的目录
 
 # 确保用户文件目录存在
 os.makedirs(USER_FILES_DIR, exist_ok=True)

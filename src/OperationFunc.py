@@ -1,12 +1,13 @@
 # 登录逻辑
 import gradio as gr
 
-from Model import ask_medical_llm
-import database
-
+from src.Model import ask_medical_llm
+from src.database import *
+from src.TextToPDF import TextToPDF
+from src.ImageToPDF import ImageToPDF
 
 def handle_login(username, password):
-    user_id = database.authenticate_user(username, password)
+    user_id = authenticate_user(username, password)
     if user_id:
         return "", True, (user_id, username)
     else:
@@ -14,7 +15,7 @@ def handle_login(username, password):
 
 # 注册逻辑
 def handle_register(username, password):
-    ok, this_msg = database.register_user(username, password)
+    ok, this_msg = register_user(username, password)
     return ok, this_msg
 
 # 登录逻辑
@@ -40,7 +41,7 @@ def on_register(username, password):
 
 # 查询文件逻辑
 def handle_query_files():
-    files = database.get_patient_cases()
+    files = get_patient_cases()
     file_data = [
         [f"门诊号：{f['id']}，姓名：{f['name']}", f"📥 下载病历", f"📥 下载影像报告", f"📥 导入信息"]
         for f in files
@@ -76,9 +77,9 @@ def handle_record_download(user, data, evt: gr.SelectData):
         if col_index != 1:
             return gr.File(visible=False)
         if col_index == 1:
-            file_path = database.get_record_by_id(patient_id)
+            file_path = get_record_by_id(patient_id)
         elif col_index == 2:
-            file_path = database.get_image_report_by_id(patient_id)
+            file_path = get_image_report_by_id(patient_id)
         if file_path and os.path.exists(file_path):
             # 返回可见的文件下载组件
             return gr.File(
@@ -113,7 +114,7 @@ def handle_case_load(user, data, evt: gr.SelectData):
             return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
         if col_index == 3:
             print("正在载入病例信息...")
-            case_info = database.get_case_by_id(patient_id)
+            case_info = get_case_by_id(patient_id)
             #把信息填入各个空里
             name = case_info["name"]
             gender = case_info["gender"]
@@ -148,7 +149,6 @@ def chat(user_input, history):
     return "", history, result["chief_complaint"], result["examinations"], result["diagnosis"], result["disposal"]
 
 # 生成PDF
-from TextToPDF import TextToPDF
 def generate_pdf(this_name, this_gender, this_age, this_phone, condition_description,
                  chief, exam, diag, disp, this_current_user):
     if not this_current_user:
@@ -164,21 +164,19 @@ def generate_pdf(this_name, this_gender, this_age, this_phone, condition_descrip
     pdf_filename = saved_pdf[1]
     pdf_path = saved_pdf[0]
     user_id = this_current_user[0]
-    success, patient_id = database.export_patient_file(
+    success, patient_id = export_patient_file(
         this_name, this_gender, this_age, this_phone, condition_description, auxiliary_examination=None
     )
     if not success:
         print("导入患者信息失败，无法关联文件")
         return None
-    saved = database.add_user_file(user_id, pdf_filename, patient_id)
+    saved = add_user_file(user_id, pdf_filename, patient_id)
     if not saved:
         print("保存文件记录失败")
     else:
         print(f"PDF {pdf_filename} 已保存并关联到患者 {patient_id}")
     return pdf_path
 
-
-from ImageToPDF import ImageToPDF
 def image_report_generate(this_name, this_gender, this_age, this_phone, this_current_user,
                           this_clinical_diagnosis="无", this_image="无", this_description="无", this_imaging_diagnosis="无"):
     print("正在保存影像报告...")
@@ -187,7 +185,7 @@ def image_report_generate(this_name, this_gender, this_age, this_phone, this_cur
     image_report_filename = saved_image_report[1]
     image_report_path = saved_image_report[0]
     user_id = this_current_user[0]
-    database.add_user_file(user_id, image_report_filename)
+    add_user_file(user_id, image_report_filename)
     return image_report_path
 
 # 支持用户上传图片（例如影像报告）

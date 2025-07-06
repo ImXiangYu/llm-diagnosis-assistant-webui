@@ -1,15 +1,13 @@
 import gradio as gr
-from CustomCss import custom_css
-from OperationFunc import handle_case_load, handle_query_files, handle_record_download, \
-    chat, generate_pdf, handle_logout, on_register, on_login, \
-    image_report_generate, save_uploaded_image, save_uploaded_file, list_uploaded_files\
+from src.CustomCss import custom_css
+from src.OperationFunc import *
 
 # 声音转文字
-from VoiceToText import transcribe
+from src.VoiceToText import transcribe
 
 # 初始化数据库
-import database
-database.init_db()
+from src.database import init_db
+init_db()
 
 # 系统主体
 with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, theme='shivi/calm_seafoam') as demo:

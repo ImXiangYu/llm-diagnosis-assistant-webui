@@ -36,8 +36,8 @@ def ImageToPDF(name, gender, age, username,
     local_time = time.strftime("%Y_%m_%d_%H_%M", time.localtime())
     word_filename = f"医学影像报告_{name}_{local_time}.docx"
     pdf_filename = f"医学影像报告_{name}_{local_time}.pdf"
-    word_path = "SavedImageRecords/" + word_filename
-    pdf_path = "SavedImageRecords/" + pdf_filename
+    word_path = "../SavedImageRecords/" + word_filename
+    pdf_path = "../SavedImageRecords/" + pdf_filename
 
     doc.save(word_path)
 
