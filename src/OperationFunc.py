@@ -53,7 +53,7 @@ def handle_query_files():
     return file_data
 
 # 文件下载逻辑
-def handle_file_selection(user, data, evt: gr.SelectData):
+def handle_record_download(user, data, evt: gr.SelectData):
     """处理文件选择并显示下载组件"""
     try:
         # 检查用户是否登录
@@ -65,25 +65,20 @@ def handle_file_selection(user, data, evt: gr.SelectData):
         row_index = selected_idx[0]
         col_index = selected_idx[1]
 
-        # 只允许点击第二列（索引为1）时触发下载
-        if col_index != 1:
-            return gr.File(visible=False)
         selected_row = data.iloc[row_index]
-        print(selected_row[0])
-
-        # 行数据分两个，[file_name, button]
-        # 从行数据中提取file_name
-        # 获取文件路径
-        # selected_row[0] 形如 "门诊号：123，姓名：张三"
         try:
             id_str = selected_row[0].split('，')[0]  # "门诊号：123"
             patient_id = int(id_str.split('：')[1])
         except Exception as e:
             print(f"解析门诊号失败: {e}")
             return gr.File(visible=False)
-        print(patient_id)
-        print(type(patient_id))
-        file_path = database.get_record_by_id(patient_id)
+        # 只允许点击第二列（索引为1）时触发下载
+        if col_index != 1:
+            return gr.File(visible=False)
+        if col_index == 1:
+            file_path = database.get_record_by_id(patient_id)
+        elif col_index == 2:
+            file_path = database.get_image_report_by_id(patient_id)
         if file_path and os.path.exists(file_path):
             # 返回可见的文件下载组件
             return gr.File(
@@ -97,7 +92,40 @@ def handle_file_selection(user, data, evt: gr.SelectData):
     except Exception as e:
         print(f"文件选择错误: {e}")
         return gr.File(visible=False)
+    
+def handle_case_load(user, data, evt: gr.SelectData):
+    """处理载入病例信息"""
+    try:
+        # 检查用户是否登录
+        if not user:
+            return None, None, None, None, None
+        # 获取选中的行索引
+        selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
+        row_index = selected_idx[0]
+        col_index = selected_idx[1]
 
+        selected_row = data.iloc[row_index]
+        try:
+            id_str = selected_row[0].split('，')[0]  # "门诊号：123"
+            patient_id = int(id_str.split('：')[1])
+        except Exception as e:
+            print(f"解析门诊号失败: {e}")
+            return None, None, None, None, None
+        if col_index == 3:
+            print("正在载入病例信息...")
+            case_info = database.get_case_by_id(patient_id)
+            #把信息填入各个空里
+            name = case_info["name"]
+            gender = case_info["gender"]
+            age = case_info["age"]
+            phone = case_info["phone"]
+            msg = case_info["condition_description"] + "，辅助检查：" + case_info["auxiliary_examination"]
+            print(f"加载病例信息：姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}")
+            return name, gender, age, phone, msg
+
+    except Exception as e:
+        print(f"文件选择错误: {e}")
+        return None, None, None, None, None
 
 # 调用本地模型
 def chat(user_input, history):

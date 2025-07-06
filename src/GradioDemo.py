@@ -1,6 +1,6 @@
 import gradio as gr
 from CustomCss import custom_css
-from OperationFunc import handle_query_files, handle_file_selection, \
+from OperationFunc import handle_case_load, handle_query_files, handle_record_download, \
     chat, generate_pdf, handle_logout, on_register, on_login, \
     image_report_generate
 
@@ -170,12 +170,18 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
         outputs=file_table
     )
 
-
-    # 当用户选择文件时触发下载
+    # 下载病历或影像报告
     file_table.select(
-        fn=handle_file_selection,
+        fn=handle_record_download,
         inputs=[current_user, file_table],
         outputs=file_download
+    )
+
+    # 载入信息
+    file_table.select(
+        fn=handle_case_load,
+        inputs=[current_user, file_table],
+        outputs=[name, gender, age, phone, msg]
     )
 
     # 退出登录

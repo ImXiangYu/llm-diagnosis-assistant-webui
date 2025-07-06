@@ -146,11 +146,30 @@ def get_record_by_id(patient_id):
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else None
-def get_file_by_filename(file_name):
-    """根据filename获取文件路径"""
+def get_image_report_by_id(patient_id):
+    """根据患者ID获取影像报告"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT file_path FROM files WHERE file_name=?", (file_name,))
+    cursor.execute("SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?", (patient_id,"医学影像报告%"))
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else None
+def get_case_by_id(patient_id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM patients WHERE id = ?", (patient_id,))
+    row = cursor.fetchone()
+    if row:
+        files = {
+            "id": row[0],
+            "name": row[1],
+            "gender": row[2],
+            "age": row[3],
+            "phone": row[4],
+            "condition_description": row[5],
+            "auxiliary_examination": row[6]
+        }
+    else:
+        files = {}
+    conn.close()
+    return files
