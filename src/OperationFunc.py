@@ -39,13 +39,10 @@ def on_register(username, password):
     return msg, gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), None
 
 # 查询文件逻辑
-def handle_query_files(user):
-    if not user:
-        return "❌ 请先登录", None
-
-    files = database.get_user_files(user[0])
+def handle_query_files():
+    files = database.get_patient_cases()
     file_data = [
-        [f["name"], f"📥 下载"]
+        [f"门诊号：{f['id']}，姓名：{f['name']}", f"📥 下载病历", f"📥 下载影像报告", f"📥 导入信息"]
         for f in files
     ]
 
@@ -56,7 +53,7 @@ def handle_query_files(user):
     return file_data
 
 # 文件下载逻辑
-def handle_file_selection(user, data, evt: gr.SelectData):
+def handle_record_download(user, data, evt: gr.SelectData):
     """处理文件选择并显示下载组件"""
     try:
         # 检查用户是否登录
@@ -66,16 +63,22 @@ def handle_file_selection(user, data, evt: gr.SelectData):
         # 获取选中的行索引
         selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
         row_index = selected_idx[0]
+        col_index = selected_idx[1]
 
-        # 获取选中的行数据
-        # selected_data = data.iat[selected_idx[0], selected_idx[1]]
         selected_row = data.iloc[row_index]
-        # print(selected_row)
-
-        # 行数据分两个，[file_name, button]
-        # 从行数据中提取file_name
-        # 获取文件路径
-        file_path = database.get_file_by_filename(selected_row[0])
+        try:
+            id_str = selected_row[0].split('，')[0]  # "门诊号：123"
+            patient_id = int(id_str.split('：')[1])
+        except Exception as e:
+            print(f"解析门诊号失败: {e}")
+            return gr.File(visible=False)
+        # 只允许点击第二列（索引为1）时触发下载
+        if col_index != 1:
+            return gr.File(visible=False)
+        if col_index == 1:
+            file_path = database.get_record_by_id(patient_id)
+        elif col_index == 2:
+            file_path = database.get_image_report_by_id(patient_id)
         if file_path and os.path.exists(file_path):
             # 返回可见的文件下载组件
             return gr.File(
@@ -89,7 +92,40 @@ def handle_file_selection(user, data, evt: gr.SelectData):
     except Exception as e:
         print(f"文件选择错误: {e}")
         return gr.File(visible=False)
+    
+def handle_case_load(user, data, evt: gr.SelectData):
+    """处理载入病例信息"""
+    try:
+        # 检查用户是否登录
+        if not user:
+            return None, None, None, None, None
+        # 获取选中的行索引
+        selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
+        row_index = selected_idx[0]
+        col_index = selected_idx[1]
 
+        selected_row = data.iloc[row_index]
+        try:
+            id_str = selected_row[0].split('，')[0]  # "门诊号：123"
+            patient_id = int(id_str.split('：')[1])
+        except Exception as e:
+            print(f"解析门诊号失败: {e}")
+            return None, None, None, None, None
+        if col_index == 3:
+            print("正在载入病例信息...")
+            case_info = database.get_case_by_id(patient_id)
+            #把信息填入各个空里
+            name = case_info["name"]
+            gender = case_info["gender"]
+            age = case_info["age"]
+            phone = case_info["phone"]
+            msg = case_info["condition_description"] + "，辅助检查：" + case_info["auxiliary_examination"]
+            print(f"加载病例信息：姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}")
+            return name, gender, age, phone, msg
+
+    except Exception as e:
+        print(f"文件选择错误: {e}")
+        return None, None, None, None, None
 
 # 调用本地模型
 def chat(user_input, history):
@@ -112,8 +148,11 @@ def chat(user_input, history):
 
 # 生成PDF
 from TextToPDF import TextToPDF
-def generate_pdf(this_name, this_gender, this_age, this_phone,
+def generate_pdf(this_name, this_gender, this_age, this_phone, condition_description,
                  chief, exam, diag, disp, this_current_user):
+    if not this_current_user:
+        print("当前用户信息为空，无法生成PDF")
+        return None
     # this_current_user: [user_id, username]
     print("正在准备保存为PDF...")
     saved_pdf = TextToPDF(this_name, this_gender, this_age, this_phone,
@@ -124,8 +163,19 @@ def generate_pdf(this_name, this_gender, this_age, this_phone,
     pdf_filename = saved_pdf[1]
     pdf_path = saved_pdf[0]
     user_id = this_current_user[0]
-    database.add_user_file(user_id, pdf_filename)
+    success, patient_id = database.export_patient_file(
+        this_name, this_gender, this_age, this_phone, condition_description, auxiliary_examination=None
+    )
+    if not success:
+        print("导入患者信息失败，无法关联文件")
+        return None
+    saved = database.add_user_file(user_id, pdf_filename, patient_id)
+    if not saved:
+        print("保存文件记录失败")
+    else:
+        print(f"PDF {pdf_filename} 已保存并关联到患者 {patient_id}")
     return pdf_path
+
 
 from ImageToPDF import ImageToPDF
 def image_report_generate(this_name, this_gender, this_age, this_phone, this_current_user,

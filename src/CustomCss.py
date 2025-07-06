@@ -156,4 +156,25 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
     width: 360px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+/* ============ 针对 Gradio DataFrame 的样式调整 ============ */
+/* 1. 取消表格内所有单元格的边框 */
+.gradio-dataframe table {
+    border-collapse: collapse;       /* 合并单元格边框 */
+}
+.gradio-dataframe td,
+.gradio-dataframe th {
+    border: none !important;         /* 去掉所有内、外边框 */
+}
+
+/* 2. 让第一列占更大比例（例如占 30%）*/
+.gradio-dataframe td:first-child,
+.gradio-dataframe th:first-child {
+    width: 150% !important;
+}
+
+/* 3. 其余列按比例分配（可选，让剩余三列平均分布）*/
+.gradio-dataframe td:nth-child(n+2),
+.gradio-dataframe th:nth-child(n+2) {
+    width: 23.33% !important;       /* (100% - 30%) / 3 ≈ 23.33% */
+}
 """

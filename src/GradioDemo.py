@@ -1,6 +1,6 @@
 import gradio as gr
 from CustomCss import custom_css
-from OperationFunc import handle_query_files, handle_file_selection, \
+from OperationFunc import handle_case_load, handle_query_files, handle_record_download, \
     chat, generate_pdf, handle_logout, on_register, on_login, \
     image_report_generate, save_uploaded_image, save_uploaded_file, list_uploaded_files\
 
@@ -113,18 +113,19 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                             image_report_generate_btn = gr.Button("生成医学影像报告", elem_id="normal-btn")
                             image_report_output = gr.File(label="下载医学影像报告", elem_id="image-PDF-Download")
 
-                with gr.Tab("历史病历查询"):
+                with gr.Tab("历史病例查询"):
                     with gr.Column():
-                        gr.Markdown("### 📂 历史病历")
+                        gr.Markdown("### 📂 历史病例")
                         with gr.Row():
-                            query_btn = gr.Button("🔍 查询历史病历", elem_id="normal-btn")
+                            query_btn = gr.Button("🔍 查询历史病例", elem_id="normal-btn")
 
                         # 文件列表显示 - 使用DataFrame
                         file_table = gr.DataFrame(
-                            headers=["文件名", "操作"],
+                            headers=["病例", "操作","",""],
                             datatype=["str", "str"],
                             interactive=False,
-                            wrap=True
+                            wrap=False,
+                            elem_classes="gradio-dataframe"
                         )
                     # 隐藏文件下载组件
                     file_download = gr.File(label="文件下载", visible=False)
@@ -188,7 +189,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
     # PDF生成
     generate_btn.click(
         generate_pdf,
-        inputs=[name, gender, age, phone, chief_complaint_box,
+        inputs=[name, gender, age, phone, msg, chief_complaint_box,
                 examinations_box, diagnosis_box, disposal_box, current_user],
         outputs=file_output
     )
@@ -204,15 +205,21 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
     # 历史病历查询
     query_btn.click(
         fn=handle_query_files,
-        inputs=current_user,
         outputs=file_table
     )
 
-    # 当用户选择文件时触发下载
+    # 下载病历或影像报告
     file_table.select(
-        fn=handle_file_selection,
+        fn=handle_record_download,
         inputs=[current_user, file_table],
         outputs=file_download
+    )
+
+    # 载入信息
+    file_table.select(
+        fn=handle_case_load,
+        inputs=[current_user, file_table],
+        outputs=[name, gender, age, phone, msg]
     )
 
     # 退出登录
