@@ -149,7 +149,7 @@ def save_uploaded_image(image_path):
     save_dir = "UploadedImages"
     os.makedirs(save_dir, exist_ok=True)
 
-    filename = os.path.basename(image_path)
+    filename = "影像图片_" + os.path.basename(image_path)
     save_path = os.path.join(save_dir, filename)
 
     shutil.copy(image_path, save_path)
@@ -167,7 +167,7 @@ def save_uploaded_file(file):
     upload_file_dir = "UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
     if file is not None:
-        file_path = os.path.join(upload_file_dir, os.path.basename(file.name))
+        file_path = os.path.join(upload_file_dir, "知识库文件_" + os.path.basename(file.name))
         shutil.copy(file.name, file_path)
         print(f"{file.name}, 上传成功")
         return "# " + os.path.basename(file.name) + " 上传成功！"
@@ -179,7 +179,7 @@ def list_uploaded_files():
     files = [
         os.path.join(upload_file_dir, f)
         for f in os.listdir(upload_file_dir)
-        if os.path.isfile(os.path.join(upload_file_dir, f))
+        if os.path.isfile(os.path.join(upload_file_dir, f)) and f != 'README.md'
     ]
     print("已列出所有文件")
     return files

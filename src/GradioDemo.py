@@ -42,7 +42,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                 gr.Markdown("# 智渝——智慧医疗辅诊系统")
                 with gr.Row(equal_height=True):
                     gr.Markdown("")
-                    logout_btn = gr.Button("🚪 退出登录", size="sm", elem_id="clear-btn")
+                    logout_btn = gr.Button("退出登录", size="sm", elem_id="clear-btn")
                     gr.Markdown("")
 
             # 顶部：病人信息填写
@@ -74,8 +74,8 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                             examinations_box = gr.Textbox(label="辅助检查", lines=2)
                             diagnosis_box = gr.Textbox(label="诊断", lines=2)
                             disposal_box = gr.Textbox(label="处置意见", lines=2)
-                            generate_btn = gr.Button("生成病历PDF", elem_id="normal-btn")
-                            file_output = gr.File(label="下载病历", elem_id="chat-PDF-Download")
+                            generate_btn = gr.Button("生成病历(PDF)", elem_id="normal-btn")
+                            file_output = gr.File(label="下载病历(PDF)", elem_id="chat-PDF-Download")
 
 
                 with gr.Tab("医学影像分析"):
@@ -134,7 +134,7 @@ with gr.Blocks(title="智渝——智慧医疗辅诊系统", css=custom_css, the
                         with gr.Column(scale=1, elem_id="text-in-file-upload"):
                             gr.Markdown("# 构建医学知识库")
                             gr.Markdown("### 在这里上传文件，使其作用于知识库。")
-                            gr.Markdown("### 医疗诊断模型将具备分析知识库中内容的能力！")
+                            gr.Markdown("### 辅诊系统将具备分析知识库中内容的能力！")
                             gr.Markdown("")
                             upload_file_status = gr.Markdown("")  # 显示上传结果
                         # 中间显示上传界面
