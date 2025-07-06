@@ -2,17 +2,33 @@
 import os
 import time
 import pythoncom
-from docxtpl import DocxTemplate
+from docx.shared import Mm
+from docxtpl import DocxTemplate, InlineImage
 import win32com.client
 
-def ImageToPDF(name, gender, age, phone, username):
-    doc = DocxTemplate("../Template/MedicalReportTemplate.docx")
+import random
+
+def ImageToPDF(name, gender, age, username,
+               clinical_diagnosis="无", image="无", description="无", imaging_diagnosis="无"):
+    doc = DocxTemplate("../Template/ImageTemplate.docx")
+
+    if not image:
+        insert_image = "无"
+    else:
+        insert_image = InlineImage(doc, image, width=Mm(140))
 
     context = {
+        "time": time.strftime("%Y.%m.%d %H:%M", time.localtime()),
+        "random": random.randint(1, 100),
         "name": name,
         "gender": gender,
+        "username": username,
         "age": age,
-        "phone": phone,
+        "part": "胸片",
+        "clinical_diagnosis": clinical_diagnosis,
+        "image": insert_image,
+        "description": description,
+        "imaging_diagnosis": imaging_diagnosis
     }
 
     doc.render(context)

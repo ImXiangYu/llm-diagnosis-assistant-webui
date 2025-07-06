@@ -178,9 +178,11 @@ def generate_pdf(this_name, this_gender, this_age, this_phone, condition_descrip
 
 
 from ImageToPDF import ImageToPDF
-def image_report_generate(this_name, this_gender, this_age, this_phone, this_current_user):
+def image_report_generate(this_name, this_gender, this_age, this_phone, this_current_user,
+                          this_clinical_diagnosis="无", this_image="无", this_description="无", this_imaging_diagnosis="无"):
     print("正在保存影像报告...")
-    saved_image_report = ImageToPDF(this_name, this_gender, this_age, this_phone, username=this_current_user[1])
+    saved_image_report = ImageToPDF(this_name, this_gender, this_age, this_phone,
+                                    this_clinical_diagnosis, this_image, this_description, this_imaging_diagnosis)
     image_report_filename = saved_image_report[1]
     image_report_path = saved_image_report[0]
     user_id = this_current_user[0]
@@ -197,15 +199,37 @@ def save_uploaded_image(image_path):
     save_dir = "UploadedImages"
     os.makedirs(save_dir, exist_ok=True)
 
-    filename = os.path.basename(image_path)
+    filename = "影像图片_" + os.path.basename(image_path)
     save_path = os.path.join(save_dir, filename)
 
     shutil.copy(image_path, save_path)
     print(f"图片已保存到：{save_path}")
 
-    return save_path  # 用于在界面上显示
+    return [save_path, save_path]  # 用于在界面上显示
 
 # 退出登录逻辑
 def handle_logout():
     # 返回值顺序应对应下面 outputs 的顺序
     return None, gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), "", [], "", "", "", "", ""
+
+# 上传知识库文件
+def save_uploaded_file(file):
+    upload_file_dir = "UploadedFiles"
+    os.makedirs(upload_file_dir, exist_ok=True)
+    if file is not None:
+        file_path = os.path.join(upload_file_dir, "知识库文件_" + os.path.basename(file.name))
+        shutil.copy(file.name, file_path)
+        print(f"{file.name}, 上传成功")
+        return "# " + os.path.basename(file.name) + " 上传成功！"
+    return "# 未选择任何文件 上传失败！"
+
+def list_uploaded_files():
+    upload_file_dir = "UploadedFiles"
+    os.makedirs(upload_file_dir, exist_ok=True)
+    files = [
+        os.path.join(upload_file_dir, f)
+        for f in os.listdir(upload_file_dir)
+        if os.path.isfile(os.path.join(upload_file_dir, f)) and f != 'README.md'
+    ]
+    print("已列出所有文件")
+    return files

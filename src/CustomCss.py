@@ -116,12 +116,45 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 }
 
 
-/* PDF生成 */
-#PDF-File {
-        height: 70px; /* 自定义高度 */
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        padding: 10px;
+/* 文本诊疗PDF下载 */
+#chat-PDF-Download {
+    height: 70px; /* 自定义高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+/* 医学影像报告PDF下载 */
+#image-PDF-Download {
+    height: 71px; /* 自定义高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+/* 医学影像上传 */
+#image-upload {
+    height: 188px; /* 自定义高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+/* 已上传的知识库文件 */
+#files-upload {
+    height: 300px; /* 自定义高度 */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+#text-in-file-upload {
+    height: 300px;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 360px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 /* ============ 针对 Gradio DataFrame 的样式调整 ============ */
 /* 1. 取消表格内所有单元格的边框 */
