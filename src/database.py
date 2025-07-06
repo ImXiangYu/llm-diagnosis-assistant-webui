@@ -13,15 +13,18 @@ def init_db():
     cursor = conn.cursor()
 
     # 创建用户表
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL
         )
-    ''')
+    """
+    )
     # 创建病人信息表
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS patients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -31,9 +34,11 @@ def init_db():
             condition_description TEXT,
             auxiliary_examination TEXT
         )
-    ''')
+    """
+    )
     # 创建文件表 - 添加文件路径和唯一标识字段
-    cursor.execute('''
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS files (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -43,17 +48,20 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id),
             FOREIGN KEY(patient_id) REFERENCES patients(id)
         )
-    ''')
+    """
+    )
 
-    
     conn.commit()
     conn.close()
-    
+
+
 def register_user(username, password):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        cursor.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)", (username, password)
+        )
         conn.commit()
         return True, "注册成功，即将跳转登录"
     except sqlite3.IntegrityError:
@@ -61,13 +69,17 @@ def register_user(username, password):
     finally:
         conn.close()
 
+
 def authenticate_user(username, password):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM users WHERE username=? AND password=?", (username, password))
+    cursor.execute(
+        "SELECT id FROM users WHERE username=? AND password=?", (username, password)
+    )
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else None
+
 
 def add_user_file(user_id, file_name, patient_id):
     """添加用户文件到数据库和文件系统"""
@@ -81,7 +93,7 @@ def add_user_file(user_id, file_name, patient_id):
         # 保存文件信息到数据库
         cursor.execute(
             "INSERT INTO files (user_id, file_name, file_path, patient_id) VALUES (?, ?, ?, ?)",
-            (user_id, file_name, file_path, patient_id)
+            (user_id, file_name, file_path, patient_id),
         )
         conn.commit()
         return True
@@ -91,7 +103,10 @@ def add_user_file(user_id, file_name, patient_id):
     finally:
         conn.close()
 
-def export_patient_file(name, gender, age, phone, condition_description, auxiliary_examination):
+
+def export_patient_file(
+    name, gender, age, phone, condition_description, auxiliary_examination
+):
     """
     将患者信息导入patients表。
 
@@ -112,7 +127,7 @@ def export_patient_file(name, gender, age, phone, condition_description, auxilia
         cursor.execute(
             "INSERT INTO patients (name, gender, age, phone, condition_description, auxiliary_examination)"
             " VALUES (?, ?, ?, ?, ?, ?)",
-            (name, gender, age, phone, condition_description, auxiliary_examination)
+            (name, gender, age, phone, condition_description, auxiliary_examination),
         )
         conn.commit()
         outpatient_number = cursor.lastrowid
@@ -123,37 +138,54 @@ def export_patient_file(name, gender, age, phone, condition_description, auxilia
     finally:
         conn.close()
 
+
 def get_patient_cases():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
                    SELECT * FROM patients
-                   """)
+                   """
+    )
 
     files = []
     for row in cursor.fetchall():
-        files.append({
-            "id": row[0],
-            "name": row[1],
-        })
+        files.append(
+            {
+                "id": row[0],
+                "name": row[1],
+            }
+        )
     conn.close()
     return files
+
+
 def get_record_by_id(patient_id):
     """根据患者ID获取患者信息"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?", (patient_id,"病历%"))
+    cursor.execute(
+        "SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?",
+        (patient_id, "病历%"),
+    )
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else None
+
+
 def get_image_report_by_id(patient_id):
     """根据患者ID获取影像报告"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?", (patient_id,"医学影像报告%"))
+    cursor.execute(
+        "SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?",
+        (patient_id, "医学影像报告%"),
+    )
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else None
+
+
 def get_case_by_id(patient_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -167,7 +199,7 @@ def get_case_by_id(patient_id):
             "age": row[3],
             "phone": row[4],
             "condition_description": row[5],
-            "auxiliary_examination": row[6]
+            "auxiliary_examination": row[6],
         }
     else:
         files = {}

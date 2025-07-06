@@ -1,6 +1,7 @@
 import requests
 import re
 
+
 def ask_image_model(user_input: str) -> dict:
     url = "http://localhost:11434/api/generate"
     system_prompt = (
@@ -17,19 +18,15 @@ def ask_image_model(user_input: str) -> dict:
         "model": "qwen3:4b",
         "system": system_prompt,
         "prompt": user_input,
-        "stream": False
+        "stream": False,
     }
 
     response = requests.post(url, json=payload)
     text = response.json()["response"]
 
-    result = {
-        "description": "",
-        "imaging_diagnosis": "",
-        "original": text
-    }
+    result = {"description": "", "imaging_diagnosis": "", "original": text}
 
-    pattern = r'影像所见：([\s\S]*?)影像诊断：([\s\S]*?)$'
+    pattern = r"影像所见：([\s\S]*?)影像诊断：([\s\S]*?)$"
 
     match = re.search(pattern, text)
     if match:

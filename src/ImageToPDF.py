@@ -8,8 +8,17 @@ import win32com.client
 
 import random
 
-def ImageToPDF(name, gender, age, username,
-               clinical_diagnosis="无", image="无", description="无", imaging_diagnosis="无"):
+
+def ImageToPDF(
+    name,
+    gender,
+    age,
+    username,
+    clinical_diagnosis="无",
+    image="无",
+    description="无",
+    imaging_diagnosis="无",
+):
     doc = DocxTemplate("../Template/ImageTemplate.docx")
 
     if not image:
@@ -28,7 +37,7 @@ def ImageToPDF(name, gender, age, username,
         "clinical_diagnosis": clinical_diagnosis,
         "image": insert_image,
         "description": description,
-        "imaging_diagnosis": imaging_diagnosis
+        "imaging_diagnosis": imaging_diagnosis,
     }
 
     doc.render(context)
