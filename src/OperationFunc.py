@@ -1,6 +1,7 @@
 # 登录逻辑
 import gradio as gr
 
+from src.ImageModel import ask_image_model
 from src.Model import ask_medical_llm
 from src.database import *
 from src.TextToPDF import TextToPDF
@@ -85,6 +86,18 @@ def on_register(username, password):
         None,
     )
 
+def handle_create_case(
+    name, gender, age, phone
+):
+    """处理创建病例"""
+    outpatient_number = create_patient_case(
+        name, gender, age, phone
+    )
+    if outpatient_number:
+        return outpatient_number
+
+    return "❌ 创建病例失败"
+
 
 # 查询文件逻辑
 def handle_query_files():
@@ -127,18 +140,26 @@ def handle_record_download(user, data, evt: gr.SelectData):
             print(f"解析门诊号失败: {e}")
             return gr.File(visible=False)
         # 只允许点击第二列（索引为1）时触发下载
-        if col_index != 1:
+        if col_index != 1 and col_index != 2:
             return gr.File(visible=False)
         if col_index == 1:
             file_path = get_record_by_id(patient_id)
+            if not file_path:
+                print(f"未找到门诊号 {patient_id} 的病历文件")
+                # 加一个前端提示在此处
+                return gr.File(visible=False)
         elif col_index == 2:
             file_path = get_image_report_by_id(patient_id)
-        if file_path and os.path.exists(file_path):
+            if not file_path:
+                print(f"未找到门诊号 {patient_id} 的影像报告文件")
+                # 加一个前端提示在此处
+                return gr.File(visible=False)
+        print(file_path)
+        if os.path.exists(file_path):
             # 返回可见的文件下载组件
             return gr.File(
                 value=file_path, visible=True, label=f"下载文件: {selected_row[0]}"
             )
-
         return gr.File(visible=False)
 
     except Exception as e:
@@ -159,37 +180,37 @@ def handle_case_load(user, data, evt: gr.SelectData):
 
         selected_row = data.iloc[row_index]
         try:
-            id_str = selected_row[0].split("，")[0]  # "门诊号：123"
+            id_str = selected_row[0].split("，")[0]
             patient_id = int(id_str.split("：")[1])
         except Exception as e:
             print(f"解析门诊号失败: {e}")
-            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
         if col_index == 3:
             print("正在载入病例信息...")
             case_info = get_case_by_id(patient_id)
+            if case_info["auxiliary_examination"]:
+                pass
+            else:
+                case_info["auxiliary_examination"] = "无"
             # 把信息填入各个空里
             name = case_info["name"]
             gender = case_info["gender"]
             age = case_info["age"]
             phone = case_info["phone"]
             msg = (
-                case_info["condition_description"]
+                case_info["chief"]
                 + "，辅助检查："
-                + (
-                    case_info["auxiliary_examination"]
-                    if case_info["auxiliary_examination"]
-                    else "无"
-                )
+                + case_info["auxiliary_examination"]
             )
             print(
-                f"加载病例信息：姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}"
+                f"加载病例信息：门诊号={patient_id}，姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}"
             )
-            return name, gender, age, phone, msg
+            return patient_id, name, gender, age, phone, msg
         else:
-            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+            return gr.update(),gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
     except Exception as e:
         print(f"文件选择错误: {e}")
-        return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+        return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
 
 # 调用本地模型
@@ -218,14 +239,36 @@ def chat(user_input, history):
         result["disposal"],
     )
 
+def image_chat(user_input, image_history, image_input):
+    print("--------------已开启新一轮调用--------------")
+    result = ask_image_model(user_input, image_input)
+
+    print("--------------result--------------")
+    print(result)
+
+    # 用于模型记录输出
+    medical_data = {}
+    medical_data.update(result)
+
+    image_history.append({"role": "user", "content": user_input})
+    image_history.append({"role": "assistant", "content": result["original"]})
+
+    print("--------------history--------------")
+    print(image_history)
+    return (
+        "",
+        image_history,
+        result["description"],
+        result["imaging_diagnosis"],
+    )
 
 # 生成PDF
-def generate_pdf(
+def record_generate(
+    patient_id,
     this_name,
     this_gender,
     this_age,
     this_phone,
-    condition_description,
     chief,
     exam,
     diag,
@@ -237,6 +280,7 @@ def generate_pdf(
         return None
     # this_current_user: [user_id, username]
     print("正在准备保存为PDF...")
+    print("病情描述："+chief)
     saved_pdf = TextToPDF(
         this_name,
         this_gender,
@@ -251,18 +295,15 @@ def generate_pdf(
     pdf_filename = saved_pdf[1]
     pdf_path = saved_pdf[0]
     user_id = this_current_user[0]
-    success, patient_id = export_patient_file(
-        this_name,
-        this_gender,
-        this_age,
-        this_phone,
-        condition_description,
-        auxiliary_examination=None,
+    success = update_patient_case(
+        patient_id,
+        chief,
+        exam,
     )
     if not success:
         print("导入患者信息失败，无法关联文件")
         return None
-    saved = add_user_file(user_id, pdf_filename, patient_id)
+    saved = add_file(user_id, pdf_filename, patient_id, "record")
     if not saved:
         print("保存文件记录失败")
     else:
@@ -271,6 +312,7 @@ def generate_pdf(
 
 
 def image_report_generate(
+    patient_id,
     this_name,
     this_gender,
     this_age,
@@ -295,7 +337,19 @@ def image_report_generate(
     image_report_filename = saved_image_report[1]
     image_report_path = saved_image_report[0]
     user_id = this_current_user[0]
-    add_user_file(user_id, image_report_filename)
+    success = update_patient_case(
+        patient_id,
+        None,
+        this_imaging_diagnosis,
+    )
+    if not success:
+        print("导入患者信息失败，无法关联文件")
+        return None
+    saved = add_file(user_id, image_report_filename, patient_id, "image_report")
+    if not saved:
+        print("保存文件记录失败")
+    else:
+        print(f"PDF {image_report_filename} 已保存并关联到患者 {patient_id}")
     return image_report_path
 
 

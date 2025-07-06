@@ -31,7 +31,7 @@ def init_db():
             gender TEXT,
             age INTEGER,
             phone TEXT,
-            condition_description TEXT,
+            chief TEXT,
             auxiliary_examination TEXT
         )
     """
@@ -81,15 +81,17 @@ def authenticate_user(username, password):
     return result[0] if result else None
 
 
-def add_user_file(user_id, file_name, patient_id):
-    """添加用户文件到数据库和文件系统"""
+def add_file(user_id, file_name, patient_id, file_type):
+    """添加病历到数据库和文件系统"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     try:
         # 生成唯一路径
-        file_path = "SavedMedicalRecords/" + f"{file_name}"
-
+        if file_type == "record":
+            file_path = "SavedMedicalRecords/" + f"{file_name}"
+        elif file_type == "image_report":
+            file_path = "SavedImageRecords/" + f"{file_name}"
         # 保存文件信息到数据库
         cursor.execute(
             "INSERT INTO files (user_id, file_name, file_path, patient_id) VALUES (?, ?, ?, ?)",
@@ -104,40 +106,49 @@ def add_user_file(user_id, file_name, patient_id):
         conn.close()
 
 
-def export_patient_file(
-    name, gender, age, phone, condition_description, auxiliary_examination
+def create_patient_case(
+    name, gender, age, phone
 ):
-    """
-    将患者信息导入patients表。
-
-    参数：
-    - name: 患者姓名
-    - gender: 性别
-    - age: 年龄
-    - phone: 电话
-    - condition_description: 病情描述
-    - auxiliary_examination: 辅助检查
-    返回：
-    - True, 新增记录的门诊号
-    - False, 插入失败
-    """
+    """创建患者信息记录"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO patients (name, gender, age, phone)"
+        " VALUES (?, ?, ?, ?)",
+        (name, gender, age, phone),
+    )
+    conn.commit()
+    outpatient_number = cursor.lastrowid
+    conn.close()
+    return outpatient_number
+
+def update_patient_case(
+    patient_id, chief, auxiliary_examination
+):
+    """更新患者信息记录"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    print("============更新中===============")
     try:
-        cursor.execute(
-            "INSERT INTO patients (name, gender, age, phone, condition_description, auxiliary_examination)"
-            " VALUES (?, ?, ?, ?, ?, ?)",
-            (name, gender, age, phone, condition_description, auxiliary_examination),
-        )
+        if chief:
+            print(chief)
+            cursor.execute(
+                "UPDATE patients SET chief=? WHERE id=?",
+                (chief, patient_id),
+            )
+        if auxiliary_examination:
+            cursor.execute(
+                "UPDATE patients SET auxiliary_examination=? WHERE id=?",
+                (auxiliary_examination, patient_id),
+            )
         conn.commit()
-        outpatient_number = cursor.lastrowid
-        return True, outpatient_number
+        return True
     except Exception as e:
-        print(f"导入患者信息出错: {e}")
-        return False, None
+        print(f"更新患者信息失败: {e}")
+        return False
     finally:
         conn.close()
-
+    
 
 def get_patient_cases():
     conn = sqlite3.connect(DB_FILE)
@@ -161,7 +172,7 @@ def get_patient_cases():
 
 
 def get_record_by_id(patient_id):
-    """根据患者ID获取患者信息"""
+    """根据患者ID获取患者病历"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute(
@@ -189,6 +200,7 @@ def get_image_report_by_id(patient_id):
 def get_case_by_id(patient_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+    print("patient_id:", patient_id)
     cursor.execute("SELECT * FROM patients WHERE id = ?", (patient_id,))
     row = cursor.fetchone()
     if row:
@@ -198,7 +210,7 @@ def get_case_by_id(patient_id):
             "gender": row[2],
             "age": row[3],
             "phone": row[4],
-            "condition_description": row[5],
+            "chief": row[5],
             "auxiliary_examination": row[6],
         }
     else:

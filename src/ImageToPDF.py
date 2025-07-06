@@ -19,7 +19,7 @@ def ImageToPDF(
     description="无",
     imaging_diagnosis="无",
 ):
-    doc = DocxTemplate("../Template/ImageTemplate.docx")
+    doc = DocxTemplate("Template/ImageTemplate.docx")
 
     if not image:
         insert_image = "无"
@@ -45,8 +45,8 @@ def ImageToPDF(
     local_time = time.strftime("%Y_%m_%d_%H_%M", time.localtime())
     word_filename = f"医学影像报告_{name}_{local_time}.docx"
     pdf_filename = f"医学影像报告_{name}_{local_time}.pdf"
-    word_path = "../SavedImageRecords/" + word_filename
-    pdf_path = "../SavedImageRecords/" + pdf_filename
+    word_path = "SavedImageRecords/" + word_filename
+    pdf_path = "SavedImageRecords/" + pdf_filename
 
     doc.save(word_path)
 
