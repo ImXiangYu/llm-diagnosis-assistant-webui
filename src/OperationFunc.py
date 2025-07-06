@@ -98,7 +98,7 @@ def handle_case_load(user, data, evt: gr.SelectData):
     try:
         # 检查用户是否登录
         if not user:
-            return None, None, None, None, None
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
         # 获取选中的行索引
         selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
         row_index = selected_idx[0]
@@ -110,7 +110,7 @@ def handle_case_load(user, data, evt: gr.SelectData):
             patient_id = int(id_str.split('：')[1])
         except Exception as e:
             print(f"解析门诊号失败: {e}")
-            return None, None, None, None, None
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
         if col_index == 3:
             print("正在载入病例信息...")
             case_info = database.get_case_by_id(patient_id)
@@ -119,13 +119,14 @@ def handle_case_load(user, data, evt: gr.SelectData):
             gender = case_info["gender"]
             age = case_info["age"]
             phone = case_info["phone"]
-            msg = case_info["condition_description"] + "，辅助检查：" + case_info["auxiliary_examination"]
+            msg = case_info["condition_description"] + "，辅助检查：" + (case_info["auxiliary_examination"] if case_info["auxiliary_examination"] else "无")
             print(f"加载病例信息：姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}")
             return name, gender, age, phone, msg
-
+        else :
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
     except Exception as e:
         print(f"文件选择错误: {e}")
-        return None, None, None, None, None
+        return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
 
 # 调用本地模型
 def chat(user_input, history):
