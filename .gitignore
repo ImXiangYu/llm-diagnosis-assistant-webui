@@ -1,7 +1,7 @@
 SavedMedicalRecords/病历*
 SavedImageRecords/医学影像报告*
-UploadedImages/
-UploadedFiles/
+UploadedImages/影像图片*
+UploadedFiles/知识库文件*
 __pycache__/
 UserFiles/
 .gradio/
