@@ -41,14 +41,19 @@ with gr.Blocks(
 
         # 主界面
         with gr.Column(visible=False) as main_panel:
-            with gr.Row(equal_height=True):
-                with gr.Row(equal_height=True):
-                    user_label = gr.Markdown()
+            with gr.Row():
+                with gr.Column():
+                    with gr.Row(height=8):
+                        user_label = gr.Markdown()
+                    with gr.Row(height=8):
+                        logout_btn = gr.Button("退出登录", size="sm",elem_id="logout-btn")
+                        gr.Markdown("")
+                        gr.Markdown("")
                 gr.Markdown("# 智渝——智慧医疗辅诊系统")
                 with gr.Row(equal_height=True):
                     gr.Markdown("")
-                    logout_btn = gr.Button("退出登录", size="sm", elem_id="clear-btn")
                     gr.Markdown("")
+                    create_btn = gr.Button("创建病例", elem_id="normal-btn")
 
             # 顶部：病人信息填写
             with gr.Row():
@@ -57,6 +62,7 @@ with gr.Blocks(
                 gender = gr.Radio(["男", "女"], label="性别")
                 age = gr.Textbox(label="年龄")
                 phone = gr.Textbox(label="电话")
+
                 create_btn = gr.Button("创建病例", elem_id="normal-btn")
 
             with gr.Tabs():
@@ -274,7 +280,7 @@ with gr.Blocks(
 
     # 用户名显示
     current_user.change(
-        lambda u: f"## 👤 当前用户：**{u[1]}**" if u else "",
+        lambda u: f"### 👤 当前用户：**{u[1]}**" if u else "",
         inputs=current_user,
         outputs=user_label,
     )

@@ -361,7 +361,7 @@ def save_uploaded_image(image_path):
     if image_path is None or not os.path.exists(image_path):
         return None
 
-    save_dir = "UploadedImages"
+    save_dir = "../UploadedImages"
     os.makedirs(save_dir, exist_ok=True)
 
     filename = "影像图片_" + os.path.basename(image_path)
@@ -374,7 +374,7 @@ def save_uploaded_image(image_path):
 
 # 上传知识库文件
 def save_uploaded_file(file):
-    upload_file_dir = "UploadedFiles"
+    upload_file_dir = "../UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
     if file is not None:
         file_path = os.path.join(
@@ -387,7 +387,7 @@ def save_uploaded_file(file):
 
 
 def list_uploaded_files():
-    upload_file_dir = "UploadedFiles"
+    upload_file_dir = "../UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
     files = [
         os.path.join(upload_file_dir, f)
