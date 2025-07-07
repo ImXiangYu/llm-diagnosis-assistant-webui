@@ -25,6 +25,7 @@ def handle_register(username, password):
 # 登录逻辑
 def on_login(username, password):
     if not username:
+        gr.Warning(message="用户名不能为空", duration=2, title="登录页")
         return (
             "用户名不能为空",
             gr.update(visible=True),
@@ -33,6 +34,7 @@ def on_login(username, password):
             None,
         )
     if not password:
+        gr.Warning(message="密码不能为空", duration=2, title="登录页")
         return (
             "密码不能为空",
             gr.update(visible=True),
@@ -53,6 +55,7 @@ def on_login(username, password):
 # 注册逻辑
 def on_register(username, password):
     if not username:
+        gr.Warning(message="用户名不能为空", duration=2, title="注册页")
         return (
             "用户名不能为空",
             gr.update(visible=False),
@@ -61,6 +64,7 @@ def on_register(username, password):
             None,
         )
     if not password:
+        gr.Warning(message="密码不能为空", duration=2, title="注册页")
         return (
             "密码不能为空",
             gr.update(visible=False),
@@ -70,6 +74,7 @@ def on_register(username, password):
         )
     success, msg = handle_register(username, password)
     if success:
+        gr.Success(message="注册成功，已跳转至主页面！", duration=2,  title="注册")
         _, _, current_user = handle_login(username, password)
         return (
             msg,
@@ -91,7 +96,11 @@ def handle_create_case(name, gender, age, phone):
     """处理创建病例"""
     outpatient_number = create_patient_case(name, gender, age, phone)
     if outpatient_number:
+        gr.Success(message="创建病例成功!", duration=1, title="病例创建")
         return outpatient_number
+
+    gr.Error(message="创建病例失败!", duration=1, title="病例创建")
+
     return "❌ 创建病例失败"
 
 def handle_clear_chat():
@@ -150,12 +159,14 @@ def handle_record_download(user, data, evt: gr.SelectData):
             file_path = get_record_by_id(patient_id)
             if not file_path:
                 print(f"未找到门诊号 {patient_id} 的病历文件")
+                gr.Warning(message=f"未找到门诊号 {patient_id} 的病历文件", duration=3, title="报告下载")
                 # 加一个前端提示在此处
                 return gr.File(visible=False)
         elif col_index == 2:
             file_path = get_image_report_by_id(patient_id)
             if not file_path:
                 print(f"未找到门诊号 {patient_id} 的影像报告文件")
+                gr.Warning(message=f"未找到门诊号 {patient_id} 的影像报告文件", duration=3, title="报告下载")
                 # 加一个前端提示在此处
                 return gr.File(visible=False)
         print(file_path)
@@ -403,14 +414,15 @@ def save_uploaded_image(image_path):
 def save_uploaded_file(file):
     upload_file_dir = "UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
-    if file is not None:
+    if not file:
+        gr.Warning(message="未选择任何文件 上传失败！", duration=3, title="文件上传")
+    else:
         file_path = os.path.join(
             upload_file_dir, "知识库文件_" + os.path.basename(file.name)
         )
         shutil.copy(file.name, file_path)
         print(f"{file.name}, 上传成功")
-        return "# " + os.path.basename(file.name) + " 上传成功！"
-    return "# 未选择任何文件 上传失败！"
+        gr.Success(message=os.path.basename(file.name) + ",上传成功！", duration=3, title="文件上传")
 
 
 def list_uploaded_files():
