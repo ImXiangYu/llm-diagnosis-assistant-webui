@@ -94,8 +94,9 @@ def handle_create_case(
         name, gender, age, phone
     )
     if outpatient_number:
+        gr.Success(message="创建病例成功!", duration=1, title="病例创建")
         return outpatient_number
-
+    gr.Error(message="创建病例失败!", duration=1, title="病例创建")
     return "❌ 创建病例失败"
 
 
@@ -146,12 +147,14 @@ def handle_record_download(user, data, evt: gr.SelectData):
             file_path = get_record_by_id(patient_id)
             if not file_path:
                 print(f"未找到门诊号 {patient_id} 的病历文件")
+                gr.Warning(message=f"未找到门诊号 {patient_id} 的病历文件", duration=3, title="报告下载")
                 # 加一个前端提示在此处
                 return gr.File(visible=False)
         elif col_index == 2:
             file_path = get_image_report_by_id(patient_id)
             if not file_path:
                 print(f"未找到门诊号 {patient_id} 的影像报告文件")
+                gr.Warning(message=f"未找到门诊号 {patient_id} 的影像报告文件", duration=3, title="报告下载")
                 # 加一个前端提示在此处
                 return gr.File(visible=False)
         print(file_path)
