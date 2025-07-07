@@ -25,6 +25,7 @@ def handle_register(username, password):
 # 登录逻辑
 def on_login(username, password):
     if not username:
+        gr.Warning(message="用户名不能为空", duration=2, title="登录页")
         return (
             "用户名不能为空",
             gr.update(visible=True),
@@ -33,6 +34,7 @@ def on_login(username, password):
             None,
         )
     if not password:
+        gr.Warning(message="密码不能为空", duration=2, title="登录页")
         return (
             "密码不能为空",
             gr.update(visible=True),
@@ -53,6 +55,7 @@ def on_login(username, password):
 # 注册逻辑
 def on_register(username, password):
     if not username:
+        gr.Warning(message="用户名不能为空", duration=2, title="注册页")
         return (
             "用户名不能为空",
             gr.update(visible=False),
@@ -61,6 +64,7 @@ def on_register(username, password):
             None,
         )
     if not password:
+        gr.Warning(message="密码不能为空", duration=2, title="注册页")
         return (
             "密码不能为空",
             gr.update(visible=False),
@@ -70,6 +74,7 @@ def on_register(username, password):
         )
     success, msg = handle_register(username, password)
     if success:
+        gr.Success(message="注册成功，已跳转至主页面！", duration=2,  title="注册")
         _, _, current_user = handle_login(username, password)
         return (
             msg,
@@ -364,7 +369,7 @@ def save_uploaded_image(image_path):
     if image_path is None or not os.path.exists(image_path):
         return None
 
-    save_dir = "../UploadedImages"
+    save_dir = "UploadedImages"
     os.makedirs(save_dir, exist_ok=True)
 
     filename = "影像图片_" + os.path.basename(image_path)
@@ -377,20 +382,21 @@ def save_uploaded_image(image_path):
 
 # 上传知识库文件
 def save_uploaded_file(file):
-    upload_file_dir = "../UploadedFiles"
+    upload_file_dir = "UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
-    if file is not None:
+    if not file:
+        gr.Warning(message="未选择任何文件 上传失败！", duration=3, title="文件上传")
+    else:
         file_path = os.path.join(
             upload_file_dir, "知识库文件_" + os.path.basename(file.name)
         )
         shutil.copy(file.name, file_path)
         print(f"{file.name}, 上传成功")
-        return "# " + os.path.basename(file.name) + " 上传成功！"
-    return "# 未选择任何文件 上传失败！"
+        gr.Success(message=os.path.basename(file.name) + ",上传成功！", duration=3, title="文件上传")
 
 
 def list_uploaded_files():
-    upload_file_dir = "../UploadedFiles"
+    upload_file_dir = "UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
     files = [
         os.path.join(upload_file_dir, f)
