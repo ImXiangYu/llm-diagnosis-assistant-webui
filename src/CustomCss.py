@@ -43,6 +43,12 @@ custom_css ="""
     color: white;
 }
 
+/* 登出按钮 */
+#logout-btn {
+    background-color: red;
+    color: white;
+}
+
 #normal-btn {
     background-color: #90EE90;
     color: #1D4ED8;
@@ -65,7 +71,6 @@ h2 {
 /* Markdown 标题样式 */
 h3 {
     color: #1e40af;
-    margin-bottom: 20px;
 }
 
 /* 普通文本框边框样式 */
@@ -148,6 +153,7 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
     padding: 10px;
 }
 
+/* 上传知识库界面的文字 */
 #text-in-file-upload {
     height: 300px;
     background-color: white;
@@ -156,6 +162,7 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
     width: 360px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
 /* ============ 针对 Gradio DataFrame 的样式调整 ============ */
 /* 1. 取消表格内所有单元格的边框 */
 .gradio-dataframe table {
