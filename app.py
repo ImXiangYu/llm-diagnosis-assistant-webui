@@ -63,8 +63,6 @@ with gr.Blocks(
                 age = gr.Textbox(label="年龄")
                 phone = gr.Textbox(label="电话")
 
-                create_btn = gr.Button("创建病例", elem_id="normal-btn")
-
             with gr.Tabs():
                 with gr.Tab("文本诊疗"):
                     with gr.Row():
@@ -196,8 +194,6 @@ with gr.Blocks(
                             gr.Markdown("# 构建医学知识库")
                             gr.Markdown("### 在这里上传文件，使其作用于知识库。")
                             gr.Markdown("### 辅诊系统将具备分析知识库中内容的能力！")
-                            gr.Markdown("")
-                            upload_file_status = gr.Markdown("")  # 显示上传结果
                         # 中间显示上传界面
                         with gr.Column(scale=2):
                             # 上传文件
@@ -370,7 +366,7 @@ with gr.Blocks(
 
     # 知识库文件上传
     upload_file_btn.click(
-        fn=save_uploaded_file, inputs=file_input, outputs=upload_file_status
+        fn=save_uploaded_file, inputs=file_input
     )
 
     # 刷新时显示所有文件
