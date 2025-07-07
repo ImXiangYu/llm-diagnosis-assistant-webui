@@ -52,14 +52,12 @@ with gr.Blocks(
 
             # 顶部：病人信息填写
             with gr.Row():
-                patient_id = gr.Textbox(label="门诊号",interactive=False)
+                patient_id = gr.Textbox(label="门诊号", interactive=False)
                 name = gr.Textbox(label="姓名")
                 gender = gr.Radio(["男", "女"], label="性别")
                 age = gr.Textbox(label="年龄")
                 phone = gr.Textbox(label="电话")
-                create_btn = gr.Button(
-                    "创建病例", elem_id="normal-btn"
-                )
+                create_btn = gr.Button("创建病例", elem_id="normal-btn")
 
             with gr.Tabs():
                 with gr.Tab("文本诊疗"):
@@ -69,7 +67,10 @@ with gr.Blocks(
                             chatbot = gr.Chatbot(
                                 label="诊疗对话", type="messages", height=300
                             )
-                            msg = gr.Textbox(label="请输入您的病情描述[支持语音输入]", interactive=True)
+                            msg = gr.Textbox(
+                                label="请输入您的病情描述[支持语音输入]",
+                                interactive=True,
+                            )
                             with gr.Row():
                                 clear_btn = gr.ClearButton(
                                     [msg, chatbot],
@@ -108,7 +109,10 @@ with gr.Blocks(
                             image_chatbot = gr.Chatbot(
                                 label="医学影像分析", type="messages", height=300
                             )
-                            image_msg = gr.Textbox(label="请输入对于医学影像的描述[支持语音输入]", interactive=True)
+                            image_msg = gr.Textbox(
+                                label="请输入对于医学影像的描述[支持语音输入]",
+                                interactive=True,
+                            )
                             with gr.Row():
                                 image_clear_btn = gr.ClearButton(
                                     [image_msg, image_chatbot],
@@ -334,24 +338,28 @@ with gr.Blocks(
     file_table.select(
         fn=handle_case_load,
         inputs=[current_user, file_table],
-        outputs=[patient_id,name, gender, age, phone, msg],
-    )
-
-    # 退出登录
-    logout_btn.click(
-        fn=handle_logout,
         outputs=[
-            current_user,
-            login_panel,
-            register_panel,
-            main_panel,
+            patient_id,
+            name,
+            gender,
+            age,
+            phone,
             msg,
             chatbot,
             chief_complaint_box,
             examinations_box,
             diagnosis_box,
             disposal_box,
+            image_chatbot,
+            image_msg,
+            description_box,
+            imaging_diagnosis_box
         ],
+    )
+
+    # 退出登录
+    logout_btn.click(
+        fn=None, inputs=None, outputs=None, js="window.location.reload()"
     )
 
     # 知识库文件上传

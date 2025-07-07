@@ -7,26 +7,30 @@
 ## 项目结构
 ```
 .
-├── app.py                              主页面
 ├── README.md
-├── requirements.txt                    依赖列表
+├── SavedImageRecords
+│   └── README.md
+├── SavedMedicalRecords
+│   └── README.md
 ├── Template
-│        ├── ImageTemplate.docx         影像报告模板
-│        └── MedicalReportTemplate.docx 病历模板
+│   ├── ImageTemplate.docx
+│   └── MedicalReportTemplate.docx
+├── app.py
+├── requirements.txt
 └── src
-    ├── CustomCss.py                    全局样式设置
-    ├── ImageToPDF.py                   医学影像报告生成
-    ├── Model.py                        大模型
-    ├── OperationFunc.py                操作逻辑相关函数
-    ├── SavedImageRecords               生成的医学影像保存目录
-    ├── SavedMedicalRecords             病历保存目录
-    │        └── README.md          
-    ├── TextToPDF.py                    文本转PDF
-    ├── UploadedImages                  上传的医学影像保存目录
-    │        └── placeholder.txt
-    ├── VoiceToText.py                  声音转文字
-    ├── app.db                          数据库
-    └── database.py                     数据库处理文件
+    ├── CustomCss.py
+    ├── ImageModel.py
+    ├── ImageToPDF.py
+    ├── Model.py
+    ├── OperationFunc.py
+    ├── TextToPDF.py
+    ├── UploadedFiles
+    │   └── README.md
+    ├── UploadedImages
+    │   └── README.md
+    ├── VoiceToText.py
+    ├── app.db
+    └── database.py
 ```
 ## 如何使用
 ### Requirements
