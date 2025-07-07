@@ -63,8 +63,6 @@ with gr.Blocks(
                 age = gr.Textbox(label="年龄")
                 phone = gr.Textbox(label="电话")
 
-                create_btn = gr.Button("创建病例", elem_id="normal-btn")
-
             with gr.Tabs():
                 with gr.Tab("文本诊疗"):
                     with gr.Row():
