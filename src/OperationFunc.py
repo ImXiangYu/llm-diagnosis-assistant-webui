@@ -92,10 +92,16 @@ def handle_create_case(name, gender, age, phone):
     outpatient_number = create_patient_case(name, gender, age, phone)
     if outpatient_number:
         return outpatient_number
-
     return "❌ 创建病例失败"
 
+def handle_clear_chat():
+    """清除聊天记录"""
+    return "", [], "", "", "", ""
 
+def handle_clear_image_chat():
+    """清除影像聊天记录"""
+    print("清除影像聊天记录")
+    return "", [], None,"", ""
 # 查询文件逻辑
 def handle_query_files():
     files = get_patient_cases()
@@ -104,7 +110,8 @@ def handle_query_files():
             f"门诊号：{f['id']}，姓名：{f['name']}",
             f"📥 下载病历",
             f"📥 下载影像报告",
-            f"📥 导入信息",
+            f"⤵️ 导入信息",
+            f"🗑️ 删除"
         ]
         for f in files
     ]
@@ -164,7 +171,7 @@ def handle_record_download(user, data, evt: gr.SelectData):
         return gr.File(visible=False)
 
 
-def handle_case_load(user, data, evt: gr.SelectData):
+def handle_case_load(data, evt: gr.SelectData):
     """处理载入病例信息"""
     # 获取选中的行索引
     selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
@@ -209,6 +216,26 @@ def handle_case_load(user, data, evt: gr.SelectData):
             gr.update()
         )
 
+def handle_case_delete(data, evt: gr.SelectData):
+    """处理删除病例信息"""
+    # 获取选中的行索引
+    selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
+    row_index = selected_idx[0]
+    col_index = selected_idx[1]
+    selected_row = data.iloc[row_index]
+    id_str = selected_row[0].split("，")[0]
+    patient_id = int(id_str.split("：")[1])
+    if col_index == 4:
+        print(f"正在删除门诊号 {patient_id} 的病例信息...")
+        success = delete_patient_case(patient_id)
+        if success:
+            print(f"门诊号 {patient_id} 的病例信息已成功删除")
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), handle_query_files()
+        else:
+            print(f"删除门诊号 {patient_id} 的病例信息失败")
+            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), handle_query_files()
+    else:
+        return data
 
 # 调用本地模型
 def chat(user_input, history):
@@ -359,9 +386,9 @@ import os
 
 def save_uploaded_image(image_path):
     if image_path is None or not os.path.exists(image_path):
-        return None
+        return None,None
 
-    save_dir = "../UploadedImages"
+    save_dir = "UploadedImages"
     os.makedirs(save_dir, exist_ok=True)
 
     filename = "影像图片_" + os.path.basename(image_path)
@@ -374,7 +401,7 @@ def save_uploaded_image(image_path):
 
 # 上传知识库文件
 def save_uploaded_file(file):
-    upload_file_dir = "../UploadedFiles"
+    upload_file_dir = "UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
     if file is not None:
         file_path = os.path.join(
@@ -387,7 +414,7 @@ def save_uploaded_file(file):
 
 
 def list_uploaded_files():
-    upload_file_dir = "../UploadedFiles"
+    upload_file_dir = "UploadedFiles"
     os.makedirs(upload_file_dir, exist_ok=True)
     files = [
         os.path.join(upload_file_dir, f)
