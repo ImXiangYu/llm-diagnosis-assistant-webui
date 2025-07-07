@@ -86,13 +86,10 @@ def on_register(username, password):
         None,
     )
 
-def handle_create_case(
-    name, gender, age, phone
-):
+
+def handle_create_case(name, gender, age, phone):
     """处理创建病例"""
-    outpatient_number = create_patient_case(
-        name, gender, age, phone
-    )
+    outpatient_number = create_patient_case(name, gender, age, phone)
     if outpatient_number:
         return outpatient_number
 
@@ -169,48 +166,48 @@ def handle_record_download(user, data, evt: gr.SelectData):
 
 def handle_case_load(user, data, evt: gr.SelectData):
     """处理载入病例信息"""
-    try:
-        # 检查用户是否登录
-        if not user:
-            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
-        # 获取选中的行索引
-        selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
-        row_index = selected_idx[0]
-        col_index = selected_idx[1]
-
-        selected_row = data.iloc[row_index]
-        try:
-            id_str = selected_row[0].split("，")[0]
-            patient_id = int(id_str.split("：")[1])
-        except Exception as e:
-            print(f"解析门诊号失败: {e}")
-            return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
-        if col_index == 3:
-            print("正在载入病例信息...")
-            case_info = get_case_by_id(patient_id)
-            if case_info["auxiliary_examination"]:
-                pass
-            else:
-                case_info["auxiliary_examination"] = "无"
-            # 把信息填入各个空里
-            name = case_info["name"]
-            gender = case_info["gender"]
-            age = case_info["age"]
-            phone = case_info["phone"]
-            msg = (
-                case_info["chief"]
-                + "，辅助检查："
-                + case_info["auxiliary_examination"]
-            )
-            print(
-                f"加载病例信息：门诊号={patient_id}，姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}"
-            )
-            return patient_id, name, gender, age, phone, msg
-        else:
-            return gr.update(),gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
-    except Exception as e:
-        print(f"文件选择错误: {e}")
-        return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
+    # 获取选中的行索引
+    selected_idx = evt.index[0] if isinstance(evt.index, tuple) else evt.index
+    row_index = selected_idx[0]
+    col_index = selected_idx[1]
+    selected_row = data.iloc[row_index]
+    id_str = selected_row[0].split("，")[0]
+    patient_id = int(id_str.split("：")[1])
+    if col_index == 3:
+        print("正在载入病例信息...")
+        case_info = get_case_by_id(patient_id)
+        # 把信息填入各个空里
+        name = case_info["name"]
+        gender = case_info["gender"]
+        age = case_info["age"]
+        phone = case_info["phone"]
+        chief = case_info["chief"] if case_info["chief"] else "无"
+        auxiliary_examination = case_info["auxiliary_examination"] if case_info["auxiliary_examination"] else "无"
+        msg = (
+            chief + "\n辅助检查：" + auxiliary_examination
+        )
+        print(
+            f"加载病例信息：门诊号={patient_id}，姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}"
+        )
+        return patient_id, name, gender, age, phone, msg, [], "", "", "", "",[], chief, "", ""
+    else:
+        return (
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update(),
+            gr.update()
+        )
 
 
 # 调用本地模型
@@ -239,6 +236,7 @@ def chat(user_input, history):
         result["disposal"],
     )
 
+
 def image_chat(user_input, image_history, image_input):
     print("--------------已开启新一轮调用--------------")
     result = ask_image_model(user_input, image_input)
@@ -262,6 +260,7 @@ def image_chat(user_input, image_history, image_input):
         result["imaging_diagnosis"],
     )
 
+
 # 生成PDF
 def record_generate(
     patient_id,
@@ -280,7 +279,7 @@ def record_generate(
         return None
     # this_current_user: [user_id, username]
     print("正在准备保存为PDF...")
-    print("病情描述："+chief)
+    print("病情描述：" + chief)
     saved_pdf = TextToPDF(
         this_name,
         this_gender,
@@ -372,25 +371,6 @@ def save_uploaded_image(image_path):
     print(f"图片已保存到：{save_path}")
 
     return [save_path, save_path]  # 用于在界面上显示
-
-
-# 退出登录逻辑
-def handle_logout():
-    # 返回值顺序应对应下面 outputs 的顺序
-    return (
-        None,
-        gr.update(visible=True),
-        gr.update(visible=False),
-        gr.update(visible=False),
-        "",
-        [],
-        "",
-        "",
-        "",
-        "",
-        "",
-    )
-
 
 # 上传知识库文件
 def save_uploaded_file(file):
