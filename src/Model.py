@@ -1,6 +1,7 @@
 import requests
 import re
 
+
 def ask_medical_llm(user_input: str) -> dict:
     url = "http://localhost:11434/api/generate"
     system_prompt = (
@@ -19,7 +20,7 @@ def ask_medical_llm(user_input: str) -> dict:
         "model": "qwen3:4b",
         "system": system_prompt,
         "prompt": user_input,
-        "stream": False
+        "stream": False,
     }
 
     response = requests.post(url, json=payload)
@@ -36,7 +37,7 @@ def ask_medical_llm(user_input: str) -> dict:
         "examinations": "",
         "diagnosis": "",
         "disposal": "",
-        "original": cleaned_text
+        "original": cleaned_text,
     }
 
     # 正则提取主观信息、客观信息、鉴别诊断、诊疗计划
@@ -44,7 +45,7 @@ def ask_medical_llm(user_input: str) -> dict:
         "chief_complaint": r"主观信息[:：]\s*(.*?)(?=客观信息[:：])",
         "examinations": r"客观信息[:：]\s*(.*?)(?=鉴别诊断[:：])",
         "diagnosis_full": r"鉴别诊断[:：]\s*(.*?)(?=诊疗计划[:：])",
-        "disposal": r"诊疗计划[:：]\s*(.*)$"
+        "disposal": r"诊疗计划[:：]\s*(.*)$",
     }
 
     for key, pattern in patterns.items():
@@ -54,7 +55,9 @@ def ask_medical_llm(user_input: str) -> dict:
 
     # 提取第一条诊断作为 diagnosis 字段
     diagnosis_text = result.get("diagnosis_full", "")
-    match_diagnosis = re.search(r"1[.、]?\s*(.*?)\s+置信度：.*?→\s*依据：(.*?)。", diagnosis_text)
+    match_diagnosis = re.search(
+        r"1[.、]?\s*(.*?)\s+置信度：.*?→\s*依据：(.*?)。", diagnosis_text
+    )
     if match_diagnosis:
         diagnosis_name = match_diagnosis.group(1).strip()
         diagnosis_basis = match_diagnosis.group(2).strip()

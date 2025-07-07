@@ -7,13 +7,14 @@
 ## 项目结构
 ```
 .
+├── app.py                              主页面
 ├── README.md
+├── requirements.txt                    依赖列表
 ├── Template
 │        ├── ImageTemplate.docx         影像报告模板
 │        └── MedicalReportTemplate.docx 病历模板
 └── src
     ├── CustomCss.py                    全局样式设置
-    ├── GradioDemo.py                   主页面
     ├── ImageToPDF.py                   医学影像报告生成
     ├── Model.py                        大模型
     ├── OperationFunc.py                操作逻辑相关函数
@@ -32,13 +33,16 @@
 先在根目录下运行指令进行环境安装  
 `pip install -r requirements.txt`
 
-### 模型下载
-运行`GradioDemo.py`会自动下载需要的模型
+### 模型加载
+运行项目前需先启动ollama服务  
+`ollama serve`  
+在`src/model.py`中修改模型与模型参数  
+运行`app.py`会自动下载需要的语言识别模型
 
 ### 运行
-直接使用`python GradioDemo.py`即可运行
+直接使用`python app.py`即可运行
 
-也可以使用`gradio GradioDemo.py`进行热部署  
+也可以使用`gradio app.py`进行热部署  
 但部分情况下会出现Bug，仅推荐开发时使用
 
 ## 项目介绍

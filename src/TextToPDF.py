@@ -5,8 +5,18 @@ import pythoncom
 from docxtpl import DocxTemplate
 import win32com.client
 
-def TextToPDF(name, gender, age, phone,
-              chief_complaint="无", examinations="无", diagnosis="无", disposal="无", username="wys"):
+
+def TextToPDF(
+    name,
+    gender,
+    age,
+    phone,
+    chief_complaint="无",
+    examinations="无",
+    diagnosis="无",
+    disposal="无",
+    username="wys",
+):
     doc = DocxTemplate("Template/MedicalReportTemplate.docx")
 
     context = {
@@ -19,7 +29,7 @@ def TextToPDF(name, gender, age, phone,
         "diagnosis": diagnosis,
         "disposal": disposal,
         "username": username,
-        "date": time.strftime("%Y.%m.%d")
+        "date": time.strftime("%Y.%m.%d"),
     }
 
     doc.render(context)
