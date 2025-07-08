@@ -85,12 +85,19 @@ with gr.Blocks(
                         # 左侧：聊天界面
                         with gr.Column(scale=1):
                             chatbot = gr.Chatbot(
-                                label="诊疗对话", type="messages", height=300
+                                label="诊疗对话", type="messages", height=260
                             )
-                            msg = gr.Textbox(
-                                label="请输入您的病情描述[支持语音输入]",
-                                interactive=True,
-                            )
+                            with gr.Row(equal_height=True):
+                                msg = gr.Textbox(
+                                    label="请输入您的病情描述[支持语音输入]",
+                                    interactive=True,
+                                    lines=3,
+                                    scale=4,
+                                )
+                                model_enhancement = gr.CheckboxGroup(
+                                    label="模型增强", show_label=False,
+                                    choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
+                                    scale=1)
                             with gr.Row():
                                 clear_btn = gr.Button(value="清除记录", elem_id="clear-btn")
                                 transcribe_btn = gr.Button(
@@ -120,12 +127,19 @@ with gr.Blocks(
                         # 左侧：聊天界面
                         with gr.Column(scale=1):
                             image_chatbot = gr.Chatbot(
-                                label="医学影像分析", type="messages", height=300
+                                label="医学影像分析", type="messages", height=260
                             )
-                            image_msg = gr.Textbox(
-                                label="请输入对于医学影像的描述[支持语音输入]",
-                                interactive=True,
-                            )
+                            with gr.Row(equal_height=True):
+                                image_msg = gr.Textbox(
+                                    label="请输入对于医学影像的描述[支持语音输入]",
+                                    interactive=True,
+                                    lines=3,
+                                    scale=4,
+                                )
+                                image_model_enhancement = gr.CheckboxGroup(
+                                    label="模型增强", show_label=False,
+                                    choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
+                                    scale=1)
                             with gr.Row():
                                 image_clear_btn = gr.Button(
                                     value="清除记录",
@@ -248,7 +262,7 @@ with gr.Blocks(
     # 发送病情诊断
     send_btn.click(
         chat,
-        inputs=[msg, chatbot],
+        inputs=[msg, chatbot, model_enhancement],
         outputs=[
             msg,
             chatbot,

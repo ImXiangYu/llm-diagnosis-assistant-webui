@@ -2,7 +2,23 @@ import requests
 import re
 
 
-def ask_medical_llm(user_input: str) -> dict:
+def ask_medical_llm(user_input: str, model_enhancement) -> dict:
+    network_information = ""
+    if "🌐联网搜索" in model_enhancement:
+        print("现在启动联网搜索")
+        network_url="http://localhost:6666/mcp/chat"
+        search=True
+        network_messages = [
+            {"role": "system", "content": ""},
+            {"role": "user", "content": user_input}
+        ]
+        payload = {"messages": network_messages, "stream": False, "search": search}
+        network_response = requests.post(network_url, json=payload)
+
+        # 安全获取第一个结果
+        network_information = network_response.json()[2]["content"]
+        print(network_information)
+
     url = "http://localhost:11434/api/generate"
     system_prompt = (
         "你作为临床医生，需严格按SOAP框架（四部分）整理患者病历。"
@@ -15,14 +31,12 @@ def ask_medical_llm(user_input: str) -> dict:
         "注意这四部分是由浅入深，层层深入的。你的回复一定要立足实际，严谨准确，专业细致！"
         "此外请格外注意你的回复，每一部分之间不换行不加粗，每一部分之中可保持层次清晰。"
     )
-
     payload = {
         "model": "qwen3:4b",
         "system": system_prompt,
-        "prompt": user_input,
+        "prompt": network_information + user_input,
         "stream": False,
     }
-
     response = requests.post(url, json=payload)
     raw_text = response.json()["response"]
     print(raw_text)
