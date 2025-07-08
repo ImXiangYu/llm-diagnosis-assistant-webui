@@ -4,6 +4,7 @@ import re
 
 def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     network_information = ""
+    enable_thinking = ""
     if "🌐联网搜索" in model_enhancement:
         print("现在启动联网搜索")
         network_url="http://localhost:6666/mcp/chat"
@@ -18,6 +19,14 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
         # 安全获取第一个结果
         network_information = network_response.json()[2]["content"]
         print(network_information)
+
+    if "🤔深度思考" in model_enhancement:
+        enable_thinking = "/no_think"
+
+    if "📚检索增强" in model_enhancement:
+        # search_url = "http://0.0.0.0:8000/search/basic?query=" + user_input
+        # search_response = requests.get(search_url)
+        print("search_on")
 
     url = "http://localhost:11434/api/generate"
     system_prompt = (
@@ -34,7 +43,7 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     payload = {
         "model": "qwen3:4b",
         "system": system_prompt,
-        "prompt": network_information + user_input,
+        "prompt": network_information + user_input + enable_thinking,
         "stream": False,
     }
     response = requests.post(url, json=payload)
@@ -57,8 +66,8 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     # 正则提取主观信息、客观信息、鉴别诊断、诊疗计划
     patterns = {
         "chief_complaint": r"主观信息[:：]\s*(.*?)(?=客观信息[:：])",
-        "examinations": r"客观信息[:：]\s*(.*?)(?=鉴别诊断[:：])",
-        "diagnosis_full": r"鉴别诊断[:：]\s*(.*?)(?=诊疗计划[:：])",
+        "examinations": r"客观信息[:：]\s*(.*?)(?=1[\.．])",
+        "diagnosis_full": r"(1[\.．].*?)(?=诊疗计划[:：])",
         "disposal": r"诊疗计划[:：]\s*(.*)$",
     }
 
@@ -70,7 +79,7 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     # 提取第一条诊断作为 diagnosis 字段
     diagnosis_text = result.get("diagnosis_full", "")
     match_diagnosis = re.search(
-        r"1[.、]?\s*(.*?)\s+置信度：.*?→\s*依据：(.*?)。", diagnosis_text
+        r"1[.、]?\s*(.*?)\s+置信度：.*?→\s*依据：(.*?)(?:。|$)", diagnosis_text
     )
     if match_diagnosis:
         diagnosis_name = match_diagnosis.group(1).strip()
