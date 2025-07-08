@@ -32,6 +32,7 @@ def init_db():
             age INTEGER,
             phone TEXT,
             chief TEXT,
+            history_of_present_illness TEXT,
             auxiliary_examination TEXT
         )
     """
@@ -123,18 +124,18 @@ def create_patient_case(
     return outpatient_number
 
 def update_patient_case(
-    patient_id, chief, auxiliary_examination
+    patient_id, history_of_present_illness, auxiliary_examination
 ):
     """更新患者信息记录"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     print("============更新中===============")
     try:
-        if chief:
-            print(chief)
+        if history_of_present_illness:
+            print(history_of_present_illness)
             cursor.execute(
-                "UPDATE patients SET chief=? WHERE id=?",
-                (chief, patient_id),
+                "UPDATE patients SET history_of_present_illness=? WHERE id=?",
+                (history_of_present_illness, patient_id),
             )
         if auxiliary_examination:
             cursor.execute(
@@ -212,7 +213,8 @@ def get_case_by_id(patient_id):
             "age": row[3],
             "phone": row[4],
             "chief": row[5],
-            "auxiliary_examination": row[6],
+            "history_of_present_illness": row[6],
+            "auxiliary_examination": row[7],
         }
     else:
         files = {}
@@ -232,3 +234,14 @@ def delete_patient_case(patient_id):
         return False
     finally:
         conn.close()
+
+def check_hpi_exist(patinet_id):
+    """检查现病史是否存在"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT history_of_present_illness FROM patients WHERE id = ?", (patinet_id,)
+    )
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None

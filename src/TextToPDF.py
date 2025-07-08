@@ -7,11 +7,13 @@ import win32com.client
 
 
 def TextToPDF(
+    patient_id,
     name,
     gender,
     age,
     phone,
     chief_complaint="无",
+    history_of_present_illness="无",
     examinations="无",
     diagnosis="无",
     disposal="无",
@@ -20,11 +22,13 @@ def TextToPDF(
     doc = DocxTemplate("Template/MedicalReportTemplate.docx")
 
     context = {
+        "patient_id": patient_id,
         "name": name,
         "gender": gender,
         "age": age,
         "phone": phone,
         "chief_complaint": chief_complaint,
+        "history_of_present_illness": history_of_present_illness,
         "examinations": examinations,
         "diagnosis": diagnosis,
         "disposal": disposal,
