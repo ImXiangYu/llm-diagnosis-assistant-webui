@@ -46,7 +46,9 @@ with gr.Blocks(
                     with gr.Row(height=8):
                         user_label = gr.Markdown()
                     with gr.Row(height=8):
-                        logout_btn = gr.Button("退出登录", size="sm",elem_id="logout-btn")
+                        logout_btn = gr.Button(
+                            "退出登录", size="sm", elem_id="logout-btn"
+                        )
                         gr.Markdown("")
                         gr.Markdown("")
                 gr.Markdown("# 智渝——智慧医疗辅诊系统")
@@ -83,11 +85,7 @@ with gr.Blocks(
                                     choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
                                     scale=1)
                             with gr.Row():
-                                clear_btn = gr.ClearButton(
-                                    [msg, chatbot],
-                                    value="清空对话",
-                                    elem_id="clear-btn",
-                                )
+                                clear_btn = gr.Button(value="清除记录", elem_id="clear-btn")
                                 transcribe_btn = gr.Button(
                                     "识别语音", elem_id="normal-btn"
                                 )
@@ -96,9 +94,6 @@ with gr.Blocks(
                                 audio_input = gr.Audio(
                                     sources=["microphone"], label="语音输入"
                                 )
-                            transcribe_btn.click(
-                                transcribe, inputs=audio_input, outputs=msg
-                            )
 
                         # 右侧：可编辑框和PDF生成
                         with gr.Column(scale=1):
@@ -132,9 +127,8 @@ with gr.Blocks(
                                     choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
                                     scale=1)
                             with gr.Row():
-                                image_clear_btn = gr.ClearButton(
-                                    [image_msg, image_chatbot],
-                                    value="清空对话",
+                                image_clear_btn = gr.Button(
+                                    value="清除记录",
                                     elem_id="clear-btn",
                                 )
                                 image_transcribe_btn = gr.Button(
@@ -193,7 +187,7 @@ with gr.Blocks(
 
                         # 文件列表显示 - 使用DataFrame
                         file_table = gr.DataFrame(
-                            headers=["病例", "操作", "", ""],
+                            headers=["病例", "操作", "", "", ""],
                             datatype=["str", "str"],
                             interactive=False,
                             wrap=False,
@@ -239,6 +233,17 @@ with gr.Blocks(
                                 elem_id="files-upload",
                             )
 
+    transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
+
+    clear_btn.click(
+        fn=handle_clear_chat,
+        outputs=[msg, chatbot, chief_complaint_box, examinations_box, diagnosis_box, disposal_box]
+    )
+
+    image_clear_btn.click(
+        fn=handle_clear_image_chat,
+        outputs=[image_msg, image_chatbot, image_input, description_box, imaging_diagnosis_box]
+    )
     # 发送病情诊断
     send_btn.click(
         chat,
@@ -353,7 +358,7 @@ with gr.Blocks(
     # 载入信息
     file_table.select(
         fn=handle_case_load,
-        inputs=[current_user, file_table],
+        inputs=file_table,
         outputs=[
             patient_id,
             name,
@@ -369,14 +374,17 @@ with gr.Blocks(
             image_chatbot,
             image_msg,
             description_box,
-            imaging_diagnosis_box
+            imaging_diagnosis_box,
         ],
     )
-
-    # 退出登录
-    logout_btn.click(
-        fn=None, inputs=None, outputs=None, js="window.location.reload()"
+    # 删除病例
+    file_table.select(
+        fn=handle_case_delete,
+        inputs=file_table,
+        outputs=[patient_id, name, gender, age, phone, file_table],
     )
+    # 退出登录
+    logout_btn.click(fn=None, inputs=None, outputs=None, js="window.location.reload()")
 
     # 知识库文件上传
     upload_file_btn.click(
