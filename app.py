@@ -192,6 +192,7 @@ with gr.Blocks(
                             interactive=False,
                             wrap=False,
                             elem_classes="gradio-dataframe",
+                            show_search="filter"
                         )
                     # 隐藏文件下载组件
                     file_download = gr.File(label="文件下载", visible=False)

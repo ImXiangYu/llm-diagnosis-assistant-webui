@@ -176,7 +176,7 @@ def get_record_by_id(patient_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ?",
+        "SELECT file_path FROM files WHERE patient_id=? AND file_name LIKE ? ORDER BY id DESC LIMIT 1",
         (patient_id, "病历%"),
     )
     result = cursor.fetchone()
