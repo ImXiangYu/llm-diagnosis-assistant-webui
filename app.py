@@ -94,6 +94,10 @@ with gr.Blocks(
                                     lines=3,
                                     scale=4,
                                 )
+                                history_of_present_illness = gr.Textbox(
+                                    label="现病史",
+                                    visible=False
+                                )
                                 model_enhancement = gr.CheckboxGroup(
                                     label="模型增强", show_label=False,
                                     choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
@@ -262,10 +266,11 @@ with gr.Blocks(
     # 发送病情诊断
     send_btn.click(
         chat,
-        inputs=[msg, chatbot, model_enhancement],
+        inputs=[patient_id, msg, chatbot, model_enhancement],
         outputs=[
             msg,
             chatbot,
+            history_of_present_illness,
             chief_complaint_box,
             examinations_box,
             diagnosis_box,
@@ -288,7 +293,7 @@ with gr.Blocks(
     reg_btn.click(
         on_register,
         inputs=[reg_user, reg_pass],
-        outputs=[reg_info, login_panel, register_panel, main_panel, current_user],
+        outputs=[reg_info, login_panel, register_panel, welcome_panel, main_panel, current_user],
     )
 
     # 登录
@@ -334,6 +339,7 @@ with gr.Blocks(
             age,
             phone,
             chief_complaint_box,
+            history_of_present_illness,
             examinations_box,
             diagnosis_box,
             disposal_box,
@@ -350,7 +356,6 @@ with gr.Blocks(
             name,
             gender,
             age,
-            phone,
             current_user,
             diagnosis_box,
             image_path_box,

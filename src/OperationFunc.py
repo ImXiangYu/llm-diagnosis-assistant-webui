@@ -63,6 +63,7 @@ def on_register(username, password):
             "用户名不能为空",
             gr.update(visible=False),
             gr.update(visible=True),
+            gr.update(visible=True),
             gr.update(visible=False),
             None,
         )
@@ -71,6 +72,7 @@ def on_register(username, password):
         return (
             "密码不能为空",
             gr.update(visible=False),
+            gr.update(visible=True),
             gr.update(visible=True),
             gr.update(visible=False),
             None,
@@ -83,12 +85,14 @@ def on_register(username, password):
             msg,
             gr.update(visible=False),
             gr.update(visible=False),
+            gr.update(visible=False),
             gr.update(visible=True),
             current_user,
         )
     return (
         msg,
         gr.update(visible=False),
+        gr.update(visible=True),
         gr.update(visible=True),
         gr.update(visible=False),
         None,
@@ -202,15 +206,16 @@ def handle_case_load(data, evt: gr.SelectData):
         gender = case_info["gender"]
         age = case_info["age"]
         phone = case_info["phone"]
-        chief = case_info["chief"] if case_info["chief"] else "无"
+        chief = case_info["chief"]
+        history_of_present_illness = case_info["history_of_present_illness"] if case_info["history_of_present_illness"] else "无"
         auxiliary_examination = case_info["auxiliary_examination"] if case_info["auxiliary_examination"] else "无"
         msg = (
-            chief + "\n辅助检查：" + auxiliary_examination
+            history_of_present_illness + "\n辅助检查：" + auxiliary_examination
         )
         print(
             f"加载病例信息：门诊号={patient_id}，姓名={name}，性别={gender}，年龄={age}，电话={phone}，病情描述={msg}"
         )
-        return patient_id, name, gender, age, phone, msg, [], "", "", "", "",[], chief, "", ""
+        return patient_id, name, gender, age, phone, msg, [], chief, "", "", "",[], chief, "", ""
     else:
         return (
             gr.update(),
@@ -252,7 +257,7 @@ def handle_case_delete(data, evt: gr.SelectData):
         return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), handle_query_files()
 
 # 调用本地模型
-def chat(user_input, history, model_enhancement):
+def chat(patient_id, user_input, history, model_enhancement):
     print(f"模型增强: {model_enhancement}")
     print("--------------已开启新一轮调用--------------")
     result = ask_medical_llm(user_input, model_enhancement)
@@ -269,9 +274,14 @@ def chat(user_input, history, model_enhancement):
 
     print("--------------history--------------")
     print(history)
+
+    #检查是否已有现病史
+    is_hpi_exist = check_hpi_exist(patient_id)
+    print(f"现病史是否存在: {is_hpi_exist}")
     return (
         "",
         history,
+        is_hpi_exist if is_hpi_exist else user_input,
         result["chief_complaint"],
         result["examinations"],
         result["diagnosis"],
@@ -311,6 +321,7 @@ def record_generate(
     this_age,
     this_phone,
     chief,
+    history_of_present_illness,
     exam,
     diag,
     disp,
@@ -323,11 +334,13 @@ def record_generate(
     print("正在准备保存为PDF...")
     print("病情描述：" + chief)
     saved_pdf = TextToPDF(
+        patient_id,
         this_name,
         this_gender,
         this_age,
         this_phone,
         chief_complaint=chief,
+        history_of_present_illness=history_of_present_illness,  # 历史病情描述可以在前端输入
         examinations=exam,
         diagnosis=diag,
         disposal=disp,
@@ -338,7 +351,7 @@ def record_generate(
     user_id = this_current_user[0]
     success = update_patient_case(
         patient_id,
-        chief,
+        history_of_present_illness,
         exam,
     )
     if not success:
@@ -357,7 +370,6 @@ def image_report_generate(
     this_name,
     this_gender,
     this_age,
-    this_phone,
     this_current_user,
     this_clinical_diagnosis="无",
     this_image="无",
@@ -369,7 +381,7 @@ def image_report_generate(
         this_name,
         this_gender,
         this_age,
-        this_phone,
+        this_current_user,
         this_clinical_diagnosis,
         this_image,
         this_description,

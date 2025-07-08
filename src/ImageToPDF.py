@@ -24,7 +24,7 @@ def ImageToPDF(
     if not image:
         insert_image = "无"
     else:
-        insert_image = InlineImage(doc, image, width=Mm(140))
+        insert_image = InlineImage(doc, image, width=Mm(100))
 
     context = {
         "time": time.strftime("%Y.%m.%d %H:%M", time.localtime()),
