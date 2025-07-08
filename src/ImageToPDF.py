@@ -10,11 +10,12 @@ import random
 
 
 def ImageToPDF(
+    patient_id,
     name,
     gender,
     age,
-    username,
-    clinical_diagnosis="无",
+    doctor_name,
+    user,
     image="无",
     description="无",
     imaging_diagnosis="无",
@@ -29,12 +30,13 @@ def ImageToPDF(
     context = {
         "time": time.strftime("%Y.%m.%d %H:%M", time.localtime()),
         "random": random.randint(1, 100),
+        "patient_id": patient_id,
         "name": name,
         "gender": gender,
-        "username": username,
         "age": age,
+        "doctor_name": doctor_name,
+        "username": user[1],
         "part": "胸片",
-        "clinical_diagnosis": clinical_diagnosis,
         "image": insert_image,
         "description": description,
         "imaging_diagnosis": imaging_diagnosis,

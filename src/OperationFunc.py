@@ -102,9 +102,9 @@ def on_register(username, password):
     )
 
 
-def handle_create_case(name, gender, age, phone):
+def handle_create_case(user, name, gender, age, phone):
     """处理创建病例"""
-    outpatient_number = create_patient_case(name, gender, age, phone)
+    outpatient_number = create_patient_case(user[0], name, gender, age, phone)
     if outpatient_number:
         gr.Success(message="创建病例成功!", duration=1, title="病例创建")
         return outpatient_number
@@ -354,6 +354,7 @@ def record_generate(
     user_id = this_current_user[0]
     success = update_patient_case(
         patient_id,
+        chief,
         history_of_present_illness,
         exam,
     )
@@ -374,18 +375,19 @@ def image_report_generate(
     this_gender,
     this_age,
     this_current_user,
-    this_clinical_diagnosis="无",
     this_image="无",
     this_description="无",
     this_imaging_diagnosis="无",
 ):
     print("正在保存影像报告...")
+    doctor_name = get_doctor_name(patient_id)
     saved_image_report = ImageToPDF(
+        patient_id,
         this_name,
         this_gender,
         this_age,
+        doctor_name,
         this_current_user,
-        this_clinical_diagnosis,
         this_image,
         this_description,
         this_imaging_diagnosis,
@@ -395,6 +397,7 @@ def image_report_generate(
     user_id = this_current_user[0]
     success = update_patient_case(
         patient_id,
+        None,
         None,
         this_imaging_diagnosis,
     )

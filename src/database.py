@@ -33,7 +33,9 @@ def init_db():
             phone TEXT,
             chief TEXT,
             history_of_present_illness TEXT,
-            auxiliary_examination TEXT
+            auxiliary_examination TEXT,
+            doctor_id INTEGER,
+            FOREIGN KEY(doctor_id) REFERENCES users(id)
         )
     """
     )
@@ -108,15 +110,15 @@ def add_file(user_id, file_name, patient_id, file_type):
 
 
 def create_patient_case(
-    name, gender, age, phone
+    user_id, name, gender, age, phone
 ):
     """创建患者信息记录"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO patients (name, gender, age, phone)"
-        " VALUES (?, ?, ?, ?)",
-        (name, gender, age, phone),
+        "INSERT INTO patients (doctor_id, name, gender, age, phone)"
+        " VALUES (?, ?, ?, ?, ?)",
+        (user_id, name, gender, age, phone),
     )
     conn.commit()
     outpatient_number = cursor.lastrowid
@@ -124,13 +126,19 @@ def create_patient_case(
     return outpatient_number
 
 def update_patient_case(
-    patient_id, history_of_present_illness, auxiliary_examination
+    patient_id, chief, history_of_present_illness, auxiliary_examination
 ):
     """更新患者信息记录"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     print("============更新中===============")
     try:
+        if chief:
+            print(chief)
+            cursor.execute(
+                "UPDATE patients SET chief=? WHERE id=?",
+                (chief, patient_id),
+            )
         if history_of_present_illness:
             print(history_of_present_illness)
             cursor.execute(
@@ -235,13 +243,32 @@ def delete_patient_case(patient_id):
     finally:
         conn.close()
 
-def check_hpi_exist(patinet_id):
+def check_hpi_exist(patient_id):
     """检查现病史是否存在"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT history_of_present_illness FROM patients WHERE id = ?", (patinet_id,)
+        "SELECT history_of_present_illness FROM patients WHERE id = ?", (patient_id,)
     )
     result = cursor.fetchone()
     conn.close()
     return result[0] if result else None
+
+def get_doctor_name(patient_id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            SELECT u.username
+              FROM users AS u
+              INNER JOIN patients AS p
+                ON p.doctor_id = u.id
+             WHERE p.id = ?
+            """,
+            (patient_id,)
+        )
+        result = cursor.fetchone()
+        return result[0] if result else None
+    finally:
+        conn.close()
