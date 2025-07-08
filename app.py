@@ -96,7 +96,7 @@ with gr.Blocks(
                                 )
                                 model_enhancement = gr.CheckboxGroup(
                                     label="模型增强", show_label=False,
-                                    choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
+                                    choices=["🤔深度思考", "🌐联网搜索", "📚检索增强"],
                                     scale=1)
                             with gr.Row():
                                 clear_btn = gr.Button(value="清除记录", elem_id="clear-btn")
@@ -217,6 +217,8 @@ with gr.Blocks(
                             gr.Markdown("# 构建医学知识库")
                             gr.Markdown("### 在这里上传文件，使其作用于知识库。")
                             gr.Markdown("### 辅诊系统将具备分析知识库中内容的能力！")
+                            gr.Markdown("### 还可以预览模型对知识库的掌握能力！")
+                            gr.Markdown("### 待对知识库满意后再启用检索增强。")
                         # 中间显示上传界面
                         with gr.Column(scale=2):
                             # 上传文件
@@ -232,11 +234,14 @@ with gr.Blocks(
                                 ],
                             )
                             with gr.Row():
+                                preview_model_effect_btn = gr.Button(
+                                    "预览增强效果", elem_id="normal-btn"
+                                )
                                 upload_file_btn = gr.Button(
-                                    "上传", elem_id="upload-btn"
+                                    "上传", elem_id="normal-btn"
                                 )
                                 refresh_file_btn = gr.Button(
-                                    "刷新文件列表", elem_id="refresh-btn"
+                                    "刷新文件列表", elem_id="normal-btn"
                                 )
                         # 右侧显示已上传文件
                         with gr.Column(scale=1):
@@ -247,6 +252,10 @@ with gr.Blocks(
                                 file_count="multiple",
                                 elem_id="files-upload",
                             )
+                    with gr.Row():
+                        preview_model_effect_input_box = gr.Textbox(label="输入要检索的内容", lines=1, interactive=True)
+                    with gr.Row():
+                        preview_model_effect_box = gr.Textbox(label="预览增强效果", lines=5, interactive=False)
 
     transcribe_btn.click(transcribe, inputs=audio_input, outputs=msg)
 
@@ -408,6 +417,13 @@ with gr.Blocks(
 
     # 刷新时显示所有文件
     refresh_file_btn.click(fn=list_uploaded_files, outputs=file_list_output)
+
+    # 预览模型效果
+    preview_model_effect_btn.click(
+        fn=preview_model_effect,
+        inputs=preview_model_effect_input_box,
+        outputs=preview_model_effect_box
+    )
 
     gr.Markdown("© 2025 智渝——智慧医疗辅诊系统 | 版权所有", elem_id="footer")
 
