@@ -1,5 +1,8 @@
 # 登录逻辑
+import re
+
 import gradio as gr
+import requests
 
 from src.ImageModel import ask_image_model
 from src.Model import ask_medical_llm
@@ -451,3 +454,17 @@ def list_uploaded_files():
     ]
     print("已列出所有文件")
     return files
+
+def preview_model_effect(preview_model_effect_input_box):
+    search_url = "http://localhost:8000/search/basic?query=" + preview_model_effect_input_box
+    print("search_url:" + search_url)
+    search_response = requests.get(search_url)
+    print("search_response:")
+    print(search_response)
+    raw_text = search_response.json()["response"]
+    print("模型增强回答:"+raw_text)
+    # 移除 <think> 标签及其内容
+    cleaned_text = re.sub(r"<think>.*?</think>\s*", "", raw_text, flags=re.DOTALL)
+    # 可选：去掉前后空行或多余空格
+    cleaned_text = cleaned_text.strip()
+    return cleaned_text
