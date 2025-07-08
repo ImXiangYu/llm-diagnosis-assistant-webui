@@ -79,8 +79,8 @@ with gr.Blocks(
                                     scale=4,
                                 )
                                 model_enhancement = gr.CheckboxGroup(
-                                    label="模型增强",
-                                    choices=["🤔深度思考", "🌐联网搜索"],
+                                    label="模型增强", show_label=False,
+                                    choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
                                     scale=1)
                             with gr.Row():
                                 clear_btn = gr.ClearButton(
@@ -128,8 +128,8 @@ with gr.Blocks(
                                     scale=4,
                                 )
                                 image_model_enhancement = gr.CheckboxGroup(
-                                    label="模型增强",
-                                    choices=["🤔深度思考", "🌐联网搜索"],
+                                    label="模型增强", show_label=False,
+                                    choices=["🤔深度思考", "🌐联网搜索", "📚增强检索"],
                                     scale=1)
                             with gr.Row():
                                 image_clear_btn = gr.ClearButton(
