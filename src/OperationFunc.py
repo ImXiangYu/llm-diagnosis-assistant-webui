@@ -30,6 +30,7 @@ def on_login(username, password):
             "用户名不能为空",
             gr.update(visible=True),
             gr.update(visible=False),
+            gr.update(visible=True),
             gr.update(visible=False),
             None,
         )
@@ -39,6 +40,7 @@ def on_login(username, password):
             "密码不能为空",
             gr.update(visible=True),
             gr.update(visible=False),
+            gr.update(visible=True),
             gr.update(visible=False),
             None,
         )
@@ -47,6 +49,7 @@ def on_login(username, password):
         msg,
         gr.update(visible=not success),
         gr.update(visible=False),
+        gr.update(visible=not success),
         gr.update(visible=success),
         current_user,
     )
@@ -246,7 +249,7 @@ def handle_case_delete(data, evt: gr.SelectData):
             print(f"删除门诊号 {patient_id} 的病例信息失败")
             return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), handle_query_files()
     else:
-        return data
+        return gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), handle_query_files()
 
 # 调用本地模型
 def chat(user_input, history, model_enhancement):

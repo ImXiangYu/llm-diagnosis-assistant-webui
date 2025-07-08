@@ -98,14 +98,14 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 
 #card {
     position: fixed;         /* 脱离文档流，基于窗口定位 */
-    top: 50%;                /* 顶部 50% */
-    left: 50%;               /* 左边 50% */
-    transform: translate(-50%, -50%);  /* 向左上反移自身一半，实现完美居中 */
-
+    top: 20%;                /* 顶部 20% */
+    left: 60%;               /* 左边 60% */
+    margin-left: auto;
+    margin-right: 5vw;
+    width: 400px;
     background-color: white;
     padding: 2rem;
     border-radius: 12px;
-    width: 360px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -183,5 +183,26 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 .gradio-dataframe td:nth-child(n+2),
 .gradio-dataframe th:nth-child(n+2) {
     width: 23.33% !important;       /* (100% - 30%) / 3 ≈ 23.33% */
+}
+
+#welcome-line .welcome-tagline {
+  text-align: right;
+  font-size: 3.2rem;
+  color: #004A9F;
+  margin-right: 40vw;
+  margin-top: 17vh;
+  font-weight: 600;
+}
+#welcome-line .zhiyu-title {
+  font-size: 6rem; /* 智渝专属字体大小 */
+  font-weight: 700;
+  color: #004A9F;
+  line-height: 2;
+}
+#welcome-line .welcome-image {
+  width: 300px;
+  height: auto;
+  display: block;
+  margin-left: 31vw;
 }
 """
