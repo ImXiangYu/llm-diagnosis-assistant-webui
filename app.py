@@ -331,6 +331,7 @@ with gr.Blocks(
     create_btn.click(
         fn=handle_create_case,
         inputs=[
+            current_user,
             name,
             gender,
             age,
@@ -366,7 +367,6 @@ with gr.Blocks(
             gender,
             age,
             current_user,
-            diagnosis_box,
             image_path_box,
             description_box,
             imaging_diagnosis_box,
