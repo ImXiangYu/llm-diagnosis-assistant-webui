@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 DB_FILE = "app.db"
-USER_FILES_DIR = "../SavedMedicalRecords"  # 存储用户文件的目录
+USER_FILES_DIR = "SavedMedicalRecords"  # 存储用户文件的目录
 
 # 确保用户文件目录存在
 os.makedirs(USER_FILES_DIR, exist_ok=True)
@@ -198,6 +198,7 @@ def get_image_report_by_id(patient_id):
 
 
 def get_case_by_id(patient_id):
+    """根据患者ID获取患者信息"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     print("patient_id:", patient_id)
@@ -217,3 +218,17 @@ def get_case_by_id(patient_id):
         files = {}
     conn.close()
     return files
+
+def delete_patient_case(patient_id):
+    """根据患者ID删除患者信息"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM patients WHERE id = ?", (patient_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"删除患者信息失败: {e}")
+        return False
+    finally:
+        conn.close()
