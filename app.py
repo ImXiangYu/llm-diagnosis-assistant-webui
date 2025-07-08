@@ -17,6 +17,20 @@ with gr.Blocks(
     current_user = gr.State(value=None)  # (user_id, username)
 
     with gr.Column(elem_id="main-content"):
+        welcome_panel = gr.Markdown(
+            """
+            <div class='welcome-tagline'>
+                <a>
+                <img class="welcome-image" src="https://s2.loli.net/2025/07/07/ENly46wGhPjbBfQ.png">
+                </a>
+                ——您的智能医疗助理<br>
+                助力精准诊断与影像分析
+            </div>
+            """,
+            elem_id="welcome-line",
+            visible=True
+        )
+
         # 登录页面
         with gr.Column(elem_id="card", visible=True) as login_panel:
             gr.Markdown("# 欢迎登录")
@@ -266,7 +280,7 @@ with gr.Blocks(
     login_btn.click(
         on_login,
         inputs=[login_user, login_pass],
-        outputs=[login_info, login_panel, register_panel, main_panel, current_user],
+        outputs=[login_info, login_panel, register_panel, welcome_panel, main_panel, current_user],
     )
 
     # 页面跳转（注册页与登录页互相跳转）
@@ -387,3 +401,4 @@ with gr.Blocks(
 # demo.launch(share=True)
 
 demo.launch(share=False)
+
