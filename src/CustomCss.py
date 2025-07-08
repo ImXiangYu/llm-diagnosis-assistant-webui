@@ -123,7 +123,7 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 
 /* 文本诊疗PDF下载 */
 #chat-PDF-Download {
-    height: 70px; /* 自定义高度 */
+    height: 82px; /* 自定义高度 */
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;
@@ -131,7 +131,7 @@ textarea:focus, input[type="password"]:focus, .gradio-textbox:focus {
 
 /* 医学影像报告PDF下载 */
 #image-PDF-Download {
-    height: 71px; /* 自定义高度 */
+    height: 83px; /* 自定义高度 */
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;

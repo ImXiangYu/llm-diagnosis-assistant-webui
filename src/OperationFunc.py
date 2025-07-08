@@ -249,9 +249,10 @@ def handle_case_delete(data, evt: gr.SelectData):
         return data
 
 # 调用本地模型
-def chat(user_input, history):
+def chat(user_input, history, model_enhancement):
+    print(f"模型增强: {model_enhancement}")
     print("--------------已开启新一轮调用--------------")
-    result = ask_medical_llm(user_input)
+    result = ask_medical_llm(user_input, model_enhancement)
 
     print("--------------result--------------")
     print(result)
