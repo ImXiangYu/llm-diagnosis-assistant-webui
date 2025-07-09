@@ -4,8 +4,10 @@ import re
 
 def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     network_information = ""
+    network_search = False
     enable_thinking = False
     if "🌐联网搜索" in model_enhancement:
+        network_search = True
         print("现在启动联网搜索")
         network_url = "http://localhost:6666/mcp/chat"
         search = True
@@ -63,12 +65,18 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     response_text = response.json()["response"]
     print("response:" + response_text)
 
+    raw_text = ""
+
+    if network_search:
+        raw_text = network_information + "\n\n"
+
     if enable_thinking:
         thinking_text = response.json()["thinking"]
-        raw_text = "思考：\n" + thinking_text + "\n回答：\n" + response_text
+        raw_text = raw_text + "思考：\n" + thinking_text + "\n回答：\n" + response_text
         print("thinking:" + thinking_text)
     else :
-        raw_text = "回答：\n" + response_text
+        raw_text = raw_text + "回答：\n" + response_text
+
 
     # 可选：去掉前后空行或多余空格
     cleaned_text = raw_text.strip()
