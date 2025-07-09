@@ -89,7 +89,7 @@ with gr.Blocks(
                             )
                             with gr.Row(equal_height=True):
                                 msg = gr.Textbox(
-                                    label="请输入您的病情描述[支持语音输入]",
+                                    label="请输入患者现病史[支持语音输入]",
                                     interactive=True,
                                     lines=3,
                                     scale=4,
@@ -135,7 +135,7 @@ with gr.Blocks(
                             )
                             with gr.Row(equal_height=True):
                                 image_msg = gr.Textbox(
-                                    label="请输入对于医学影像的描述[支持语音输入]",
+                                    label="请输入患者病情[支持语音输入]",
                                     interactive=True,
                                     lines=3,
                                     scale=4,
