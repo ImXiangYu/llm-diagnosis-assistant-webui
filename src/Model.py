@@ -4,8 +4,10 @@ import re
 
 def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     network_information = ""
-    enable_thinking = ""
+    network_search = False
+    enable_thinking = False
     if "🌐联网搜索" in model_enhancement:
+        network_search = True
         print("现在启动联网搜索")
         network_url = "http://localhost:6666/mcp/chat"
         search = True
@@ -21,7 +23,7 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
         print(network_information)
 
     if "🤔深度思考" in model_enhancement:
-        enable_thinking = "/no_think"
+        enable_thinking = True
 
     if "📚检索增强" in model_enhancement:
         # search_url = "http://0.0.0.0:8000/search/basic?query=" + user_input
@@ -54,17 +56,30 @@ def ask_medical_llm(user_input: str, model_enhancement) -> dict:
     payload = {
         "model": "qwen3:4b",
         "system": system_prompt,
-        "prompt": network_information + user_input + enable_thinking,
+        "prompt": network_information + user_input,
         "stream": False,
+        "think": enable_thinking # 开启think后，输出会单独在"thinking"
     }
     response = requests.post(url, json=payload)
-    raw_text = response.json()["response"]
-    print(raw_text)
 
-    # 移除 <think> 标签及其内容
-    cleaned_text = re.sub(r"<think>.*?</think>\s*", "", raw_text, flags=re.DOTALL)
+    response_text = response.json()["response"]
+    print("response:" + response_text)
+
+    raw_text = ""
+
+    if network_search:
+        raw_text = network_information + "\n\n"
+
+    if enable_thinking:
+        thinking_text = response.json()["thinking"]
+        raw_text = raw_text + "思考：\n" + thinking_text + "\n回答：\n" + response_text
+        print("thinking:" + thinking_text)
+    else :
+        raw_text = raw_text + "回答：\n" + response_text
+
+
     # 可选：去掉前后空行或多余空格
-    cleaned_text = cleaned_text.strip()
+    cleaned_text = raw_text.strip()
 
     result = {
         "chief_complaint": "",

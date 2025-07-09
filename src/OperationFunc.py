@@ -468,6 +468,8 @@ def preview_model_effect(preview_model_effect_input_box):
     print("模型增强回答:"+raw_text)
     # 移除 <think> 标签及其内容
     cleaned_text = re.sub(r"<think>.*?</think>\s*", "", raw_text, flags=re.DOTALL)
+    # 去掉** xxx **
+    cleaned_text = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned_text)
     # 可选：去掉前后空行或多余空格
     cleaned_text = cleaned_text.strip()
     return cleaned_text
